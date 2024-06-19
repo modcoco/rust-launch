@@ -1,37 +1,15 @@
+// // lib1.rs
+// pub fn router() -> axum::Router<axum::BoxRoute> {
+//     axum::Router::new().route("/path_in_lib1", axum::handler::get(handler1).boxed())
+// }
 
 // // lib2.rs
-// use axum::{handler::get, Router};
-
-// pub async fn handler2() -> &'static str {
-//     "Handler2 from lib2"
+// pub fn router() -> axum::Router<axum::BoxRoute> {
+//     axum::Router::new().route("/path_in_lib2", axum::handler::get(handler2).boxed())
 // }
 
-// pub fn get_lib2_routes() -> Router {
-//     Router::new().route("/handler2", get(handler2))
-// }
-
-// // lib1.rs
-// use axum::{handler::get, Router};
-
-// pub async fn handler1() -> &'static str {
-//     "Handler1 from lib1"
-// }
-
-// pub fn get_lib1_routes() -> Router {
-//     Router::new().route("/handler1", get(handler1))
-// }
-
-// #[tokio::main]
-// async fn main() {
-//     // Other required imports
-//     use common::tokio;
-//     use std::net::SocketAddr;
-
-//     let routes = lib1::get_lib1_routes().or(lib2::get_lib2_routes());
-
-//     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-//     Server::bind(&addr)
-//         .serve(routes.into_make_service())
-//         .await
-//         .unwrap();
-// }
+// let app = Router::new()
+//     .route("/path_in_app", get(handler).boxed())
+//     .nest("/lib1", lib1::router()) // nested under /lib1
+//     .nest("/lib2", lib2::router()) // nested under /lib2
+//     .boxed();
