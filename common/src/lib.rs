@@ -5,6 +5,9 @@ pub use reqwest;
 pub use sqlx;
 pub use tokio;
 
+mod constants;
+use constants::*;
+
 pub struct PodSecrets {
     pub cacrt: String,
     pub namespace: String,
@@ -19,25 +22,21 @@ impl Default for PodSecrets {
 
 impl PodSecrets {
     pub fn new() -> Self {
-        let cacrt_path = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt";
-        let namespace_path = "/var/run/secrets/kubernetes.io/serviceaccount/namespace";
-        let token_path = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-
-        let cacrt = match std::fs::read_to_string(cacrt_path) {
+        let cacrt = match std::fs::read_to_string(CACRT_PATH) {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("Failed to read CA certificate: {}", e);
                 String::new()
             }
         };
-        let namespace = match std::fs::read_to_string(namespace_path) {
+        let namespace = match std::fs::read_to_string(NAMESPACE_PATH) {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("Failed to read namespace: {}", e);
                 String::new()
             }
         };
-        let token = match std::fs::read_to_string(token_path) {
+        let token = match std::fs::read_to_string(TOKEN_PATH) {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("Failed to read token: {}", e);
