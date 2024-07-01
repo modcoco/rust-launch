@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.33.0", features = ["full"] }
-axum = "0.7.5"
+axum = { version = "0.7.5", features = ["macros", "ws"] }
 log = "0.4.8"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
@@ -17,6 +17,7 @@ reqwest = { version = "0.12.2", features = [
     "multipart",
     "stream",
     "blocking",
+    "rustls-tls",
 ] }
 anyhow = { version = "1.0.79", features = ["std"] }
 thiserror = "1.0.56"
@@ -30,3 +31,14 @@ sqlx-postgres = "0.7.0"
 async-trait = "0.1.77"
 delay_timer = "0.11.5"
 dotenv = "0.15.0"
+base64 = "0.22.1"
+toml = "0.8.14"
+rustls = "0.23.10"
+rustls-pemfile = "2.1.2"
+native-tls = "0.2.12"
+tokio-tungstenite = { version = "0.23.1", features = ["native-tls"] }
+futures-util = { version = "0.3.29", default-features = false, features = [
+    "async-await",
+    "sink",
+    "std",
+] }
