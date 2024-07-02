@@ -1,11 +1,15 @@
 #[cfg(test)]
 mod tests {
+    use common::anyhow;
     use common::axum::http::HeaderMap;
     use common::reqwest::blocking::Client;
     use common::reqwest::header::AUTHORIZATION;
     use common::reqwest::Certificate;
-    use common::{anyhow, tracing, url_https_builder};
+    use common::{tokio, tracing, url_https_builder};
+    use k8s_openapi::api::core::v1::Namespace;
+    use k8s_openapi::api::core::v1::Pod;
     use kube::ServiceAccountToken;
+    use kube_runtime::{api::ListParams, Api, Client as KubeClient, Config};
 
     #[test]
     fn str_trimmed() {
@@ -75,6 +79,38 @@ mod tests {
 
         tracing::info!("{}", response.status());
         tracing::info!("{}", response.text()?);
+        Ok(())
+    }
+
+    #[tokio::test]
+    pub async fn rquest_pods_kube() -> Result<(), anyhow::Error> {
+        rustls::crypto::ring::default_provider()
+            .install_default()
+            .expect("Failed to install rustls crypto provider");
+
+        let config = Config::infer().await?;
+        // let config = Config::incluster()?;
+        let client = KubeClient::try_from(config)?;
+
+        let pods: Api<Pod> = Api::namespaced(client.clone(), "default");
+
+        let lp = ListParams::default();
+        let pods = pods.list(&lp).await?;
+
+        for p in pods {
+            println!("name {:?}", p.metadata.name);
+        }
+
+        let namespaces: Api<Namespace> = Api::all(client);
+
+        let lp = ListParams::default();
+        let ns_list = namespaces.list(&lp).await?;
+
+        for ns in ns_list.items {
+            let ns_name = ns.metadata.name.as_deref().unwrap_or("<unknown>");
+            println!("Namespace name: {}", ns_name);
+        }
+
         Ok(())
     }
 }
