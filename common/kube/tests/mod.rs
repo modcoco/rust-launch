@@ -205,6 +205,7 @@ mod tests {
                 println!("ConfigMap name: {}", config_map_name);
                 if let Some(data) = config_map.data {
                     println!("ConfigMap data: {:?}", data);
+                    println!("ConfigMap data: {:?}", data.get("config.yaml"));
                 } else {
                     println!("ConfigMap does not contain data.");
                 }
