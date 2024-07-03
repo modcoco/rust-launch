@@ -315,7 +315,7 @@ mod tests {
             .and_then(|data| data.get("config.toml"))
             .ok_or_else(|| anyhow::anyhow!("ConfigMap does not contain 'config.toml'"))?;
 
-        let toml_data: HashMap<String, String> = toml::from_str(config_toml)?;
+        let toml_data: HashMap<String, toml::Value> = toml::from_str(config_toml)?;
         let develop_image_tag = toml_data
             .get("test")
             .ok_or_else(|| anyhow::anyhow!("Key 'test' not found in config.toml"))?;
