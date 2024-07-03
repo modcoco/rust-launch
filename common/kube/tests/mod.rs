@@ -293,4 +293,34 @@ mod tests {
 
         Ok(())
     }
+
+    #[tokio::test]
+    async fn get_cm_toml_value2() -> Result<(), anyhow::Error> {
+        rustls::crypto::ring::default_provider()
+            .install_default()
+            .expect("Failed to install rustls crypto provider");
+
+        let config = Config::infer().await?;
+        // let config = Config::incluster()?;
+        let client = KubeClient::try_from(config)?;
+        let namespace = "test";
+        let config_map_name = "config";
+        let config_maps: Api<ConfigMap> = Api::namespaced(client, namespace);
+
+        let config_map = config_maps.get(config_map_name).await?;
+
+        let config_toml = config_map
+            .data
+            .as_ref()
+            .and_then(|data| data.get("config.toml"))
+            .ok_or_else(|| anyhow::anyhow!("ConfigMap does not contain 'config.toml'"))?;
+
+        let toml_data: HashMap<String, String> = toml::from_str(config_toml)?;
+        let develop_image_tag = toml_data
+            .get("test")
+            .ok_or_else(|| anyhow::anyhow!("Key 'test' not found in config.toml"))?;
+
+        tracing::info!("test: {}", develop_image_tag);
+        Ok(())
+    }
 }
