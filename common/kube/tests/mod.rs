@@ -1,10 +1,12 @@
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use common::axum::http::HeaderMap;
     use common::reqwest::blocking::Client;
     use common::reqwest::header::AUTHORIZATION;
     use common::reqwest::Certificate;
-    use common::{anyhow, serde_json};
+    use common::{anyhow, serde_json, toml};
     use common::{tokio, tracing, url_https_builder};
     use k8s_openapi::api::core::v1::Pod;
     use k8s_openapi::api::core::v1::{ConfigMap, Namespace};
@@ -245,6 +247,47 @@ mod tests {
             }
             Err(e) => {
                 eprintln!("Error listing config maps: {:?}", e);
+            }
+        }
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn get_cm_toml_value() -> Result<(), Box<dyn std::error::Error>> {
+        rustls::crypto::ring::default_provider()
+            .install_default()
+            .expect("Failed to install rustls crypto provider");
+
+        let config = Config::infer().await?;
+        // let config = Config::incluster()?;
+        let client = KubeClient::try_from(config)?;
+
+        let namespace = "default";
+        let config_map_name = "test";
+
+        let config_maps: Api<ConfigMap> = Api::namespaced(client, namespace);
+
+        match config_maps.get(config_map_name).await {
+            Ok(config_map) => {
+                println!("ConfigMap name: {}", config_map_name);
+                if let Some(data) = config_map.data {
+                    if let Some(config_toml) = data.get("config.toml") {
+                        let toml_data: HashMap<String, String> = toml::from_str(config_toml)?;
+                        if let Some(develop_image_tag) = toml_data.get("TomlKey") {
+                            println!("TomlKey: {}", develop_image_tag);
+                        } else {
+                            println!("Key 'TomlKey' not found in config.toml.");
+                        }
+                    } else {
+                        println!("Key 'config.toml' not found in ConfigMap.");
+                    }
+                } else {
+                    println!("ConfigMap does not contain data.");
+                }
+            }
+            Err(e) => {
+                eprintln!("Error fetching ConfigMap: {:?}", e);
             }
         }
 

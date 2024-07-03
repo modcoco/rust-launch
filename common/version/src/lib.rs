@@ -12,6 +12,7 @@ pub use serde_json;
 pub use sqlx;
 pub use tokio;
 pub use tokio_tungstenite;
+pub use toml;
 pub use tracing;
 
 pub mod constants;
