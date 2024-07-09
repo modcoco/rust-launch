@@ -20,6 +20,13 @@ mod tests {
         println!("{}", trimmed_str);
     }
 
+    #[test]
+    fn calculate() {
+        let memory: i64 = 1055924872;
+        let memory = ((memory as f64) / (1000.0 * 1000.0)).round() as i64;
+        println!("{}", memory);
+    }
+
     fn naive_datetime_with_offset(start_time: NaiveDateTime, offset_hours: i32) -> NaiveDateTime {
         let start_time_utc: DateTime<Utc> =
             DateTime::<Utc>::from_naive_utc_and_offset(start_time, Utc);
