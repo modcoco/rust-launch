@@ -7,3 +7,4 @@ edition = "2021"
 common.workspace = true
 logger.workspace = true
 router = { path = "../router" }
+serde = { version = "1.0", features = ["derive"] }
