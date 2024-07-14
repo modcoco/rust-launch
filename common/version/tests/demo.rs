@@ -57,4 +57,15 @@ mod tests {
 
         println!("NaiveDateTime with UTC+8: {}", naive_start_time_utc_plus_8);
     }
+
+    #[test]
+    fn logs_file() {
+        let appender = tracing_appender::rolling::never(".", "cluster.log");
+        let (non_blocking_appender, _guard) = tracing_appender::non_blocking(appender);
+        tracing_subscriber::fmt()
+            .with_writer(non_blocking_appender)
+            .with_ansi(false)
+            .init();
+        tracing::info!("test")
+    }
 }

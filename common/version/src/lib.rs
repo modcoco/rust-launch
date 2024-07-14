@@ -14,6 +14,7 @@ pub use tokio;
 pub use tokio_tungstenite;
 pub use toml;
 pub use tracing;
+pub use tracing_appender;
 
 pub mod constants;
 use constants::*;

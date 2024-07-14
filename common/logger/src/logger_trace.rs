@@ -3,6 +3,9 @@ use axum::extract::Query;
 use common::axum;
 use common::chrono::Local;
 use common::tokio::{self, time::Instant};
+use common::tracing_appender;
+use common::tracing_appender::rolling::RollingFileAppender;
+use common::tracing_appender::rolling::Rotation;
 use std::sync::Arc;
 use tracing::Level;
 use tracing_subscriber::fmt::{format::Writer, time::FormatTime};
@@ -53,6 +56,8 @@ pub fn init_logger() -> ReloadLogLevelHandle {
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // sqlx::query=debug
     );
     let (filter, reload_handle) = tracing_subscriber::reload::Layer::new(default_filter);
+    // let file_appender = RollingFileAppender::new(Rotation::DAILY, "logs", "test.log");
+    // let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 
     let _ = tracing_subscriber::registry()
         .with(filter)
@@ -61,6 +66,7 @@ pub fn init_logger() -> ReloadLogLevelHandle {
                 .with_line_number(true)
                 .with_level(true)
                 .with_target(true)
+                // .with_writer(non_blocking)
                 .with_ansi(true)
                 .with_timer(LocalTimer),
         )
