@@ -80,3 +80,7 @@ where
     let formatted_dt = local_time.format("%Y-%m-%d %H:%M:%S").to_string();
     serializer.serialize_str(&formatted_dt)
 }
+
+pub fn i64_round(value: i64) -> i64 {
+    ((value as f64) / (1000.0 * 1000.0)).round() as i64
+}

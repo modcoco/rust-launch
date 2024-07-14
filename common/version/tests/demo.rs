@@ -2,6 +2,10 @@ pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
 
+fn to_gb(value: i64) -> i64 {
+    ((value as f64) / (1000.0 * 1000.0)).round() as i64
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -24,6 +28,14 @@ mod tests {
     fn calculate() {
         let memory: i64 = 1055924872;
         let memory = ((memory as f64) / (1000.0 * 1000.0)).round() as i64;
+        println!("{}", memory);
+
+        let memory: i64 = 1055924872;
+        let memory = memory / (1000 * 1000);
+        println!("{}", memory);
+
+        let memory: i64 = 1055924872;
+        let memory = to_gb(memory);
         println!("{}", memory);
     }
 
