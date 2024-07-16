@@ -68,4 +68,18 @@ mod tests {
             .init();
         tracing::info!("test")
     }
+
+    #[test]
+    fn remove_utc() {
+        let start_time: NaiveDateTime =
+            chrono::NaiveDateTime::parse_from_str("2024-07-16 17:44:14", "%Y-%m-%d %H:%M:%S")
+                .map_err(|_| sqlx::Error::Configuration("invalid start_time format".into()))
+                .unwrap();
+
+        let start_time = start_time - chrono::Duration::hours(8);
+        println!("{}", start_time);
+        let now = chrono::Local::now().naive_local() - chrono::Duration::hours(8);
+
+        println!("{}", now);
+    }
 }

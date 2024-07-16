@@ -17,6 +17,7 @@ pub use tracing;
 pub use tracing_appender;
 
 pub mod constants;
+use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
 use constants::*;
 
 pub fn url_https_builder(domain: &str, port: &str, path: Option<&str>) -> String {
@@ -32,4 +33,12 @@ fn base_http_builder(http_header: &str, domain: &str, port: &str, path: Option<&
         Some(p) => [http_header, domain, COLON, port, p].concat(),
         None => [http_header, domain, COLON, port].concat(),
     }
+}
+
+pub fn naive_datetime_with_offset(start_time: NaiveDateTime, offset_hours: i32) -> NaiveDateTime {
+    let start_time_utc: DateTime<Utc> = DateTime::<Utc>::from_naive_utc_and_offset(start_time, Utc);
+    let offset = FixedOffset::east_opt(offset_hours * 3600).expect("Failed to create offset");
+    let start_time_with_offset = start_time_utc.with_timezone(&offset);
+
+    start_time_with_offset.naive_local()
 }
