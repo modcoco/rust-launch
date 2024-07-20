@@ -1,1 +1,1 @@
-Rust boot
+Use rust boot to start
