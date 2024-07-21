@@ -100,7 +100,9 @@ mod tests {
         let pods = pods.list(&lp).await?;
 
         for p in pods {
-            println!("name {:?}", p.metadata.name);
+            // println!("name {:?}", p);
+            let json_string = serde_json::to_string(&p).expect("Failed to convert to JSON");
+            println!("name {}", json_string);
         }
 
         let namespaces: Api<Namespace> = Api::all(client);
