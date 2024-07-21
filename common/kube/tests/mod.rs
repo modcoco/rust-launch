@@ -96,7 +96,7 @@ mod tests {
 
         let pods: Api<Pod> = Api::namespaced(client.clone(), "default");
 
-        let lp = ListParams::default();
+        let lp = ListParams::default().limit(10);
         let pods = pods.list(&lp).await?;
 
         for p in pods {
@@ -105,12 +105,23 @@ mod tests {
 
         let namespaces: Api<Namespace> = Api::all(client);
 
-        let lp = ListParams::default();
+        let lp = ListParams::default().limit(2);
         let ns_list = namespaces.list(&lp).await?;
 
         for ns in ns_list.items {
             let ns_name = ns.metadata.name.as_deref().unwrap_or("<unknown>");
             println!("Namespace name: {}", ns_name);
+        }
+        let continue_token = ns_list.metadata.continue_.clone().unwrap_or_default();
+
+        let lp = ListParams::default()
+            .limit(2)
+            .continue_token(&continue_token);
+        let ns_list = namespaces.list(&lp).await?;
+
+        for ns in ns_list.items {
+            let ns_name = ns.metadata.name.as_deref().unwrap_or("<unknown>");
+            println!("Namespace2 name: {}", ns_name);
         }
 
         Ok(())
