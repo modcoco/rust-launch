@@ -1,14 +1,21 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+mod context;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+use axum::{routing::get, Router};
+use common::{
+    axum::{self, Extension},
+    tracing,
+};
+use context::Context;
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub async fn init_router() -> Router {
+    let ctx = Context::new()
+        .await
+        .map_err(|err| {
+            tracing::error!("Get context err, {}", err);
+        })
+        .unwrap();
+
+    Router::new()
+        .route("/health", get(|| async { "Hello, World!" }))
+        .layer(Extension(ctx))
 }

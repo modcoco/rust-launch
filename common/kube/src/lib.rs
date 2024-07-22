@@ -1,3 +1,6 @@
+pub use k8s_openapi;
+pub use kube_runtime;
+
 use common::{
     anyhow::{self},
     constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH},
@@ -123,13 +126,12 @@ pub async fn init_kube_client() -> Result<KubeClient, anyhow::Error> {
         .install_default()
         .expect("Failed to install rustls crypto provider");
 
-    let app_env = std::env::var("APP_ENV")?;
-    let config = if app_env == "prod" {
+    let app_env = std::env::var("APP_ENV").unwrap_or_default();
+    let config = if app_env == "prod" || app_env.is_empty() {
         Config::incluster()?
     } else {
         Config::infer().await?
     };
 
-    let client = KubeClient::try_from(config)?;
-    Ok(client)
+    Ok(KubeClient::try_from(config)?)
 }
