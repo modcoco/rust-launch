@@ -6,3 +6,4 @@ resolver = "2"
 common = { path = "./common/version" }
 logger = { path = "./common/logger" }
 kube = { path = "./common/kube" }
+util = { path = "./common/util" }

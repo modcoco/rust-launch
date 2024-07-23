@@ -3,6 +3,36 @@ use common::chrono::{self, NaiveDateTime, TimeZone as _};
 use common::serde::{self, Deserialize, Deserializer, Serializer};
 use std::{fmt::Display, str::FromStr};
 
+pub mod constants;
+pub mod err;
+pub mod rsp;
+
+use chrono::{DateTime, FixedOffset, Utc};
+use constants::*;
+
+pub fn url_https_builder(domain: &str, port: &str, path: Option<&str>) -> String {
+    base_http_builder(URL_HTTPS, domain, port, path)
+}
+
+pub fn url_http_builder(domain: &str, port: &str, path: Option<&str>) -> String {
+    base_http_builder(URL_HTTP, domain, port, path)
+}
+
+fn base_http_builder(http_header: &str, domain: &str, port: &str, path: Option<&str>) -> String {
+    match path {
+        Some(p) => [http_header, domain, COLON, port, p].concat(),
+        None => [http_header, domain, COLON, port].concat(),
+    }
+}
+
+pub fn naive_datetime_with_offset(start_time: NaiveDateTime, offset_hours: i32) -> NaiveDateTime {
+    let start_time_utc: DateTime<Utc> = DateTime::<Utc>::from_naive_utc_and_offset(start_time, Utc);
+    let offset = FixedOffset::east_opt(offset_hours * 3600).expect("Failed to create offset");
+    let start_time_with_offset = start_time_utc.with_timezone(&offset);
+
+    start_time_with_offset.naive_local()
+}
+
 // 通用的从字符串反序列化为类型 T
 pub fn deserialize_from_str<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where

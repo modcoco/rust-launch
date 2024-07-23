@@ -7,11 +7,12 @@ mod tests {
     use common::reqwest::header::AUTHORIZATION;
     use common::reqwest::Certificate;
     use common::{anyhow, serde_json, toml};
-    use common::{tokio, tracing, url_https_builder};
+    use common::{tokio, tracing};
     use k8s_openapi::api::core::v1::Pod;
     use k8s_openapi::api::core::v1::{ConfigMap, Namespace};
     use kube::ServiceAccountToken;
     use kube_runtime::{api::ListParams, Api, Client as KubeClient, Config};
+    use util::url_https_builder;
 
     #[test]
     fn str_trimmed() {

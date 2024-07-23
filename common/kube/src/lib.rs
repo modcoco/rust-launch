@@ -1,9 +1,10 @@
 pub use k8s_openapi;
 pub use kube_runtime;
 
+use util::constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH};
+
 use common::{
     anyhow::{self},
-    constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH},
     dotenv,
     native_tls::{self, TlsConnector},
     tracing,
