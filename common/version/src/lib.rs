@@ -18,6 +18,8 @@ pub use tracing;
 pub use tracing_appender;
 
 pub mod constants;
+pub mod err;
+
 use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
 use constants::*;
 
