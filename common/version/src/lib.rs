@@ -19,6 +19,7 @@ pub use tracing_appender;
 
 pub mod constants;
 pub mod err;
+pub mod rsp;
 
 use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
 use constants::*;
