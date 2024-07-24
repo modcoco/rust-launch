@@ -1,9 +1,8 @@
 [package]
-name = "router"
+name = "context"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-common.workspace = true
 kube.workspace = true
-context.workspace = true
+common.workspace = true

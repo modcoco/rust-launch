@@ -1,11 +1,9 @@
-mod context;
-
 use axum::{routing::get, Router};
 use common::{
     axum::{self, Extension},
     tracing,
 };
-use context::Context;
+use context::context::Context;
 
 pub async fn init_router() -> Router {
     let ctx = Context::new()
