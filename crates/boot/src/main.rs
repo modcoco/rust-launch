@@ -10,7 +10,7 @@ use router::init_router;
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
-    let (_handle, _guard) = init_logger("rust-boot", false);
+    let (_handle, _guard) = init_logger("rust-boot", true);
     let router = init_router().await;
     tracing::info!("start web server...");
     let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
