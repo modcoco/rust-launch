@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+    use std::process::Command;
 
     use common::axum::http::HeaderMap;
     use common::reqwest::blocking::Client;
@@ -25,6 +26,25 @@ mod tests {
     fn test_env() {
         let ps = ServiceAccountToken::new();
         println!("{:?}", ps)
+    }
+
+    #[test]
+    fn test_ip() {
+        fn check_ip_reachable(ip: &str) -> bool {
+            let output = Command::new("ping")
+                .args(["-c", "1"])
+                .arg(ip)
+                .output()
+                .expect("Failed to execute ping command");
+            output.status.success()
+        }
+        let ip = "8.8.8.84";
+
+        if check_ip_reachable(ip) {
+            println!("IP 地址 {} 可达。", ip);
+        } else {
+            println!("IP 地址 {} 不可达。", ip);
+        }
     }
 
     #[test]
