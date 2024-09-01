@@ -1,19 +1,13 @@
 use axum::{routing::get, Router};
 use common::{
+    anyhow,
     axum::{self, Extension},
-    tracing,
 };
 use context::context::Context;
 
-pub async fn init_router() -> Router {
-    let ctx = Context::new()
-        .await
-        .map_err(|err| {
-            tracing::error!("Get context err, {}", err);
-        })
-        .unwrap();
-
-    Router::new()
+pub async fn init_router() -> Result<Router, anyhow::Error> {
+    let ctx = Context::new().await?;
+    Ok(Router::new()
         .route("/health", get(|| async { "Hello, World!" }))
-        .layer(Extension(ctx))
+        .layer(Extension(ctx)))
 }

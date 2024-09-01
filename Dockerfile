@@ -7,13 +7,14 @@ RUN cargo build --release
 
 FROM debian:bullseye-slim
 ENV DEBIAN_FRONTEND=noninteractive
-ENV APP_ENV=prod
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 RUN useradd -m app
-WORKDIR /app
+WORKDIR /home/app
 COPY --from=builder /app/target/release/boot /bin
-RUN mkdir -p /app/logs && chown -R app:app /app
+COPY --from=builder /app/.kube /home/app/.kube
+COPY --from=builder /app/.env /home/app/.env
+RUN chown -R app:app /home/app
 USER app
 CMD ["/bin/boot"]
