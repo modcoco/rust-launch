@@ -13,8 +13,8 @@ RUN apt-get update && apt-get install -y \
 RUN useradd -m app
 WORKDIR /home/app
 COPY --from=builder /app/target/release/boot /bin
-COPY --from=builder /app/.kube /home/app/.kube
-COPY --from=builder /app/.env /home/app/.env
+COPY --from=builder /app/.kube .kube
+COPY --from=builder /app/.env .env
 RUN chown -R app:app /home/app
 USER app
 CMD ["/bin/boot"]
