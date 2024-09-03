@@ -1,6 +1,6 @@
-use common::{anyhow, sqlx::PgPool};
 use kube::{init_kube_client, kube_runtime};
 use kube_runtime::Client as KubeClient;
+use sqlx::PgPool;
 
 use crate::postgres::create_pg_pool;
 

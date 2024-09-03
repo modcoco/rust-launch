@@ -1,4 +1,3 @@
-use common::{sqlx, tracing};
 use regex::Regex;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;

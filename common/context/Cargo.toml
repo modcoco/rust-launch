@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 kube.workspace = true
-common.workspace = true
 config.workspace = true
-regex = "1.10.6"
+regex.workspace = true
+anyhow.workspace = true
+sqlx.workspace = true
+tracing.workspace = true
