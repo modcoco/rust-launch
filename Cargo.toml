@@ -3,8 +3,9 @@ members = ["common/*", "crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
-common = { path = "./common/version" }
-logger = { path = "./common/logger" }
-kube = { path = "./common/kube" }
-util = { path = "./common/util" }
-context = { path = "./common/context" }
+common = { path = "common/version" }
+logger = { path = "common/logger" }
+kube = { path = "common/kube" }
+util = { path = "common/util" }
+context = { path = "common/context" }
+config = { path = "common/config" }

@@ -3,11 +3,13 @@ use common::{
     anyhow,
     axum::{self, Extension},
 };
-use context::context::KubeContext;
+use context::context::{KubeContext, PgContext};
 
 pub async fn init_router() -> Result<Router, anyhow::Error> {
-    let ctx = KubeContext::new().await?;
+    let kube_ctx = KubeContext::new().await?;
+    let pg_ctx = PgContext::new().await;
     Ok(Router::new()
         .route("/health", get(|| async { "Hello, World!" }))
-        .layer(Extension(ctx)))
+        .layer(Extension(kube_ctx))
+        .layer(Extension(pg_ctx)))
 }
