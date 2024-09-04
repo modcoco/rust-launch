@@ -4,10 +4,6 @@ pub fn add(left: usize, right: usize) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use common::anyhow::Result;
-    use common::reqwest;
-    use common::tokio;
-
     use super::*;
 
     #[test]
@@ -17,7 +13,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_tokio() -> Result<()> {
+    async fn test_tokio() -> Result<(), anyhow::Error> {
         let client = reqwest::Client::new();
         let res = client
             .get("http://127.0.0.1:8080/api/v1/test")

@@ -1,8 +1,4 @@
-use axum::{routing::get, Router};
-use common::{
-    anyhow,
-    axum::{self, Extension},
-};
+use axum::{routing::get, Extension, Router};
 use context::context::{KubeContext, PgContext};
 
 pub async fn init_router() -> Result<Router, anyhow::Error> {
