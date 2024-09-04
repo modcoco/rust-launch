@@ -3,7 +3,7 @@ pub use kube_runtime;
 
 use kube_runtime::{Client as KubeClient, Config};
 use native_tls::TlsConnector;
-use util::constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH};
+use utils::constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH};
 
 #[derive(Debug)]
 pub struct ServiceAccountToken {

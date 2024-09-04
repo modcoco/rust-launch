@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 logger.workspace = true
-util.workspace = true
+utils.workspace = true
 kube-runtime.workspace = true
 k8s-openapi.workspace = true
 rustls.workspace = true

@@ -31,7 +31,7 @@ license = "AGPL-3.0"
 [workspace.dependencies]
 logger = { path = "crates/logger" }
 kube = { path = "crates/kube" }
-util = { path = "crates/util" }
+utils = { path = "crates/utils" }
 context = { path = "crates/context" }
 config = { path = "crates/config" }
 router = { path = "crates/router" }

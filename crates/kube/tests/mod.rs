@@ -12,7 +12,7 @@ mod tests {
     use reqwest::header::AUTHORIZATION;
     use reqwest::Certificate;
 
-    use util::url_https_builder;
+    use utils::url_https_builder;
 
     #[test]
     fn str_trimmed() {
