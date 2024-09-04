@@ -47,16 +47,15 @@ router = { path = "crates/router" }
 
 
 [workspace]
-members = ["common/*", "crates/*"]
+members = ["crates/*"]
 resolver = "2"
 
 [workspace.dependencies]
-common = { path = "common/version" }
-logger = { path = "common/logger" }
-kube = { path = "common/kube" }
-util = { path = "common/util" }
-context = { path = "common/context" }
-config = { path = "common/config" }
+logger = { path = "crates/logger" }
+kube = { path = "crates/kube" }
+util = { path = "crates/util" }
+context = { path = "crates/context" }
+config = { path = "crates/config" }
 tokio = { version = "1.33.0", features = ["full"] }
 axum = { version = "0.7.5", features = ["macros", "ws"] }
 log = "0.4.8"
