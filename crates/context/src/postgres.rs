@@ -4,12 +4,12 @@ use sqlx::PgPool;
 
 pub async fn create_pg_pool() -> PgPool {
     let cfg = config::get_config();
-    show_pg_connect(&cfg.database_url_postgres);
+    show_pg_connect(&cfg.database_url);
     PgPoolOptions::new()
         .max_connections(15)
         .min_connections(1)
         .acquire_timeout(std::time::Duration::from_secs(10))
-        .connect(&cfg.database_url_postgres)
+        .connect(&cfg.database_url)
         .await
         .expect("Failed to create PostgreSQL pool")
 }

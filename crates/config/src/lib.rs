@@ -10,7 +10,7 @@ static CONFIG: Lazy<ArcSwap<Config>> = Lazy::new(|| ArcSwap::from(Arc::new(Confi
 #[derive(Deserialize, Debug)]
 pub struct Config {
     pub app_env: String,
-    pub database_url_postgres: String,
+    pub database_url: String,
     pub kubernetes_ca_cert_path: Option<String>,
     pub kubernetes_namespace_path: Option<String>,
     pub kubernetes_token_path: Option<String>,
@@ -23,7 +23,7 @@ impl Config {
         dotenv().ok();
         Self {
             app_env: env::var("APP_ENV").unwrap_or_else(|_| "prod".to_string()),
-            database_url_postgres: env::var("DATABASE_URL_POSTGRES").unwrap_or_default(),
+            database_url: env::var("DATABASE_URL").unwrap_or_default(),
             kubernetes_ca_cert_path: env::var("KUBERNETES_CA_CERT_PATH").ok(),
             kubernetes_namespace_path: env::var("KUBERNETES_NAMESPACE_PATH").ok(),
             kubernetes_token_path: env::var("KUBERNETES_TOKEN_PATH").ok(),
