@@ -1,15 +1,9 @@
 pub use k8s_openapi;
 pub use kube_runtime;
 
-use util::constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH};
-
-use common::{
-    anyhow::{self},
-    dotenv,
-    native_tls::{self, TlsConnector},
-    tracing,
-};
 use kube_runtime::{Client as KubeClient, Config};
+use native_tls::TlsConnector;
+use util::constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH};
 
 #[derive(Debug)]
 pub struct ServiceAccountToken {
