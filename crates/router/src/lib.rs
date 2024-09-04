@@ -9,20 +9,27 @@ use utils::{err::AxumErr, rsp::Rsp};
 pub async fn init_router() -> Result<Router, anyhow::Error> {
     let ctx = AppContext::new().await?;
     Ok(Router::new()
-        .route("/health", on(MethodFilter::GET, health_checker))
+        .route("/info", on(MethodFilter::GET, info_checker))
         .layer(Extension(ctx)))
 }
 
-pub async fn health_checker(
+pub async fn info_checker(
     Extension(ctx): Extension<AppContext>,
 ) -> Result<impl IntoResponse, AxumErr> {
     let uptime = ctx.start_time.elapsed();
-    tracing::info!("Get container list");
-
+    let process_info = SystemInfo::new();
+    let pkg_name = env!("CARGO_PKG_NAME");
+    let pkg_version = env!("CARGO_PKG_VERSION");
     let status = serde_json::json!({
+        "name": pkg_name,
+        "version": pkg_version,
+        "pid": process_info.pid,
         "status": "healthy",
-        "uptime_seconds": uptime.as_secs(),
-        "message": "Service is running"
+        "uptimeSeconds": uptime.as_secs(),
+        "totalCpu": process_info.cpu_count,
+        "totalMemory": process_info.total_memory_gb,
+        "processCpu": process_info.process_cpu_usage,
+        "processMemory": process_info.process_memory_mb,
     });
 
     Ok(Rsp::success_with_optional_biz_status(
@@ -30,4 +37,63 @@ pub async fn health_checker(
         "Data fetched successfully.",
         Some(1),
     ))
+}
+
+// {
+//     "status": "healthy",
+//     "uptime": "123456",
+//     "timestamp": "2024-09-04T12:34:56Z",
+//     "version": "1.0.0",
+//     "resources": {
+//       "cpu_usage": "25%",
+//       "memory_usage": "512MB",
+//       "disk_usage": "40%",
+//       "network": "connected"
+//     },
+//     "dependencies": {
+//       "database": "connected",
+//       "redis": "connected",
+//       "external_api": "reachable"
+//     },
+//     "errors": []
+//   }
+
+struct SystemInfo {
+    pid: String,
+    cpu_count: usize,
+    total_memory_gb: String,
+    process_cpu_usage: String,
+    process_memory_mb: String,
+}
+
+impl SystemInfo {
+    fn new() -> Self {
+        let mut sys = sysinfo::System::new_all();
+        sys.refresh_all();
+
+        let cpu_count = sys.cpus().len();
+        let pid = sysinfo::get_current_pid().expect("Failed to get current PID");
+        let total_memory = sys.total_memory() as f32 / 1_073_741_824.0; // 1 GB = 1024 * 1024 * 1024 字节
+        let total_memory = format!("{:.2}Gi", total_memory);
+
+        let (process_cpu_usage, process_memory_mb) = if let Some(process) = sys.process(pid) {
+            let cpu_usage = process.cpu_usage();
+            let memory_usage_bytes = process.memory();
+            let actual_cpu_usage = cpu_usage / 100.0 * cpu_count as f32;
+            let memory_usage_mb = memory_usage_bytes as f32 / 1_048_576.0; // 1 MB = 1024 * 1024 字节
+            let process_cpu_usage = format!("{:.2}m", actual_cpu_usage);
+            let process_memory_mb = format!("{:.2}Mi", memory_usage_mb);
+            (process_cpu_usage, process_memory_mb)
+        } else {
+            ("unknown".to_string(), "unknown".to_string())
+        };
+
+        Self {
+            pid: pid.to_string(),
+            cpu_count,
+            total_memory_gb: total_memory,
+            process_cpu_usage,
+            process_memory_mb,
+        }
+    }
 }
