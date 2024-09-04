@@ -8,8 +8,11 @@ kube.workspace = true
 context.workspace = true
 anyhow.workspace = true
 axum.workspace = true
+tracing.workspace = true
+utils.workspace = true
+serde_json.workspace = true
 
 [dev-dependencies]
 tokio.workspace = true
 reqwest.workspace = true
-utils.workspace = true
+
