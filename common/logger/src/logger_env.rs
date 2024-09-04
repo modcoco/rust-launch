@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::thread;
 
-use common::chrono::prelude::*;
+use chrono::{DateTime, Local};
 use env_logger::fmt::Formatter;
 use env_logger::Builder;
 use log::{LevelFilter, Record};

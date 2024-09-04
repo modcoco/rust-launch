@@ -1,15 +1,13 @@
 use axum::extract::Extension;
 use axum::extract::Query;
-use common::axum;
-use common::chrono::Local;
-use common::tokio::{self, time::Instant};
-use common::tracing_appender;
-use common::tracing_appender::non_blocking::WorkerGuard;
-use common::tracing_appender::rolling::RollingFileAppender;
-use common::tracing_appender::rolling::Rotation;
+use chrono::Local;
 use std::path::PathBuf;
 use std::sync::Arc;
+use tokio::time::Instant;
 use tracing::Level;
+use tracing_appender::non_blocking::WorkerGuard;
+use tracing_appender::rolling::RollingFileAppender;
+use tracing_appender::rolling::Rotation;
 use tracing_subscriber::fmt::{format::Writer, time::FormatTime};
 use tracing_subscriber::layer::SubscriberExt as _;
 use tracing_subscriber::util::SubscriberInitExt as _;
@@ -138,7 +136,7 @@ pub async fn change_log_level(
 
 #[cfg(target_os = "linux")]
 fn is_root() -> bool {
-    unsafe { common::libc::getuid() == 0 }
+    unsafe { libc::getuid() == 0 }
 }
 
 #[cfg(target_os = "windows")]
