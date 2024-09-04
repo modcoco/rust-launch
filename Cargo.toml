@@ -1,5 +1,5 @@
 [package]
-name = "dfadfads"
+name = "rust_boot"
 version = "0.1.0"
 edition = "2021"
 
@@ -49,7 +49,7 @@ reqwest = { version = "0.12.2", features = [
 ] }
 anyhow = { version = "1.0.79", features = ["std"] }
 thiserror = "1.0.56"
-sqlx = { version = "0.8.0", features = [
+sqlx = { version = "0.8.2", features = [
     "runtime-tokio-rustls",
     "postgres",
     "macros",
