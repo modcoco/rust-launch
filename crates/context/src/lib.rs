@@ -1,5 +1,7 @@
 mod postgres;
 
+use std::time::Instant;
+
 use kube::{init_kube_client, kube_runtime};
 use kube_runtime::Client as KubeClient;
 use sqlx::PgPool;
@@ -10,6 +12,7 @@ use crate::postgres::create_pg_pool;
 pub struct AppContext {
     pub kube_client: KubeClient,
     pub pg_pool: PgPool,
+    pub start_time: Instant,
 }
 
 impl AppContext {
@@ -20,6 +23,7 @@ impl AppContext {
         Ok(Self {
             kube_client,
             pg_pool,
+            start_time: Instant::now(),
         })
     }
 }
