@@ -1,6 +1,6 @@
 #![deny(unused_crate_dependencies)]
-use common::chrono::{self, NaiveDateTime, TimeZone as _};
-use common::serde::{self, Deserialize, Deserializer, Serializer};
+use chrono::{self, NaiveDateTime, TimeZone as _};
+use serde::{self, Deserialize, Deserializer, Serializer};
 use std::{fmt::Display, str::FromStr};
 
 pub mod constants;
