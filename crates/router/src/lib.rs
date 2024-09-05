@@ -1,10 +1,10 @@
 use axum::{
     response::IntoResponse,
     routing::{on, MethodFilter},
-    Extension, Router,
+    Extension, Json, Router,
 };
 use context::AppContext;
-use utils::{err::AxumErr, rsp::Rsp};
+use utils::err::AxumErr;
 
 pub async fn init_router() -> Result<Router, anyhow::Error> {
     let ctx = AppContext::new().await?;
@@ -35,11 +35,7 @@ pub async fn info_checker(
         "processMemory": process_info.process_memory_mb,
     });
 
-    Ok(Rsp::success_with_optional_biz_status(
-        status,
-        "Data fetched successfully.",
-        Some(1),
-    ))
+    Ok(Json(status))
 }
 
 // {
