@@ -16,7 +16,8 @@ pub async fn init_router() -> Result<Router, anyhow::Error> {
 pub async fn info_checker(
     Extension(ctx): Extension<AppContext>,
 ) -> Result<impl IntoResponse, AxumErr> {
-    let uptime = ctx.start_time.elapsed();
+    let uptime = ctx.running_time.elapsed();
+    let start_time = ctx.start_time.format("%Y-%m-%dT%H:%M:%SZ").to_string();
     let process_info = SystemInfo::new();
     let pkg_name = env!("CARGO_PKG_NAME");
     let pkg_version = env!("CARGO_PKG_VERSION");
@@ -25,7 +26,9 @@ pub async fn info_checker(
         "version": pkg_version,
         "pid": process_info.pid,
         "status": "healthy",
-        "uptimeSeconds": uptime.as_secs(),
+        "startTime": start_time,
+        "uptimeSeconds": format!("{}s",uptime.as_secs()),
+
         "totalCpu": process_info.cpu_count,
         "totalMemory": process_info.total_memory_gb,
         "processCpu": process_info.process_cpu_usage,
@@ -60,7 +63,7 @@ pub async fn info_checker(
 
 struct SystemInfo {
     pid: String,
-    cpu_count: usize,
+    cpu_count: String,
     total_memory_gb: String,
     process_cpu_usage: String,
     process_memory_mb: String,
@@ -90,7 +93,7 @@ impl SystemInfo {
 
         Self {
             pid: pid.to_string(),
-            cpu_count,
+            cpu_count: format!("{}m", cpu_count),
             total_memory_gb: total_memory,
             process_cpu_usage,
             process_memory_mb,
