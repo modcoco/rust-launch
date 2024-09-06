@@ -8,9 +8,9 @@ tokio.workspace = true
 axum.workspace = true
 logger.workspace = true
 anyhow.workspace = true
-dotenv.workspace = true
 tracing.workspace = true
 router.workspace = true
+config.workspace = true
 
 [dev-dependencies]
 sqlx.workspace = true
