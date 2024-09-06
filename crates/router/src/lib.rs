@@ -6,7 +6,8 @@ use axum::{
     Extension, Json, Router,
 };
 use context::AppContext;
-use health_check::SystemInfo;
+use health_check::{SystemDependencies, SystemInfo, SystemResources, SystemStatus};
+use sqlx::Row;
 use tokio::net::TcpListener;
 use utils::err::AxumErr;
 
@@ -31,24 +32,40 @@ pub async fn info_checker(
     let process_info = SystemInfo::new();
     let pkg_name = std::env::var("CARGO_MAIN_PKG_NAME").unwrap_or("unknown".to_string());
     let pkg_version = std::env::var("CARGO_MAIN_PKG_VERSION").unwrap_or("unknown".to_owned());
-    let status = serde_json::json!({
-        "name": pkg_name,
-        "version": pkg_version,
-        "pid": process_info.pid,
-        "status": "healthy",
-        "startTime": start_time,
-        "uptimeSeconds": format!("{}s",uptime.as_secs()),
-        "resources": {
-            "totalCpu": process_info.cpu_count,
-            "totalMemory": process_info.total_memory_gb,
-            "processCpu": process_info.process_cpu_usage,
-            "processMemory": process_info.process_memory_mb,
+    let client = ctx.kube_client;
+    let kube_version_info: Option<kube::k8s_openapi::apimachinery::pkg::version::Info> =
+        match client.apiserver_version().await {
+            Ok(info) => Some(info),
+            Err(_) => None,
+        };
+    let pg_version = match sqlx::query("SELECT version()")
+        .fetch_one(&ctx.pg_pool)
+        .await
+    {
+        Ok(row) => {
+            let version: String = row.get(0);
+            Some(version)
+        }
+        Err(_) => None,
+    };
+    let status = SystemStatus {
+        name: pkg_name,
+        version: pkg_version,
+        pid: process_info.pid,
+        status: "healthy".to_string(),
+        start_time,
+        uptime_seconds: format!("{}s", uptime.as_secs()),
+        resources: SystemResources {
+            total_cpu: process_info.cpu_count,
+            total_memory: process_info.total_memory_gb,
+            process_cpu: process_info.process_cpu_usage,
+            process_memory: process_info.process_memory_mb,
         },
-        "dependencies": {
-            "database": "connected",
-            "kubernetes": "v23",
+        dependencies: SystemDependencies {
+            database: pg_version,
+            kubernetes: kube_version_info,
         },
-    });
+    };
 
     Ok(Json(status))
 }

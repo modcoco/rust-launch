@@ -1,6 +1,36 @@
 use std::thread;
 
+use serde::{Deserialize, Serialize};
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, System};
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemResources {
+    pub total_cpu: String,
+    pub total_memory: String,
+    pub process_cpu: String,
+    pub process_memory: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemDependencies {
+    pub database: Option<String>,
+    pub kubernetes: Option<kube::k8s_openapi::apimachinery::pkg::version::Info>,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemStatus {
+    pub name: String,
+    pub version: String,
+    pub pid: String,
+    pub status: String,
+    pub start_time: String,
+    pub uptime_seconds: String,
+    pub resources: SystemResources,
+    pub dependencies: SystemDependencies,
+}
 
 pub struct SystemInfo {
     pub pid: String,
