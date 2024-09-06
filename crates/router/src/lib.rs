@@ -7,13 +7,20 @@ use axum::{
 };
 use context::AppContext;
 use health_check::SystemInfo;
+use tokio::net::TcpListener;
 use utils::err::AxumErr;
 
-pub async fn init_router() -> Result<Router, anyhow::Error> {
-    let ctx = AppContext::new().await?;
-    Ok(Router::new()
-        .route("/info", on(MethodFilter::GET, info_checker))
-        .layer(Extension(ctx)))
+pub async fn init_router(ctx: AppContext) -> Result<(TcpListener, Router), anyhow::Error> {
+    let cfg = config::get_config();
+    let addr = format!("{}:{}", cfg.web_listen_addr, cfg.web_listen_port);
+    tracing::info!("start web server {}", addr);
+    let listener = TcpListener::bind(addr).await?;
+    Ok((
+        listener,
+        Router::new()
+            .route("/info", on(MethodFilter::GET, info_checker))
+            .layer(Extension(ctx)),
+    ))
 }
 
 pub async fn info_checker(

@@ -4,7 +4,9 @@ version = "0.1.12"
 edition = "2021"
 
 [dependencies]
+tokio.workspace = true
 kube.workspace = true
+config.workspace = true
 context.workspace = true
 anyhow.workspace = true
 axum.workspace = true

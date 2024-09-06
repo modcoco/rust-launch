@@ -121,10 +121,8 @@ pub async fn init_kube_client() -> Result<KubeClient, anyhow::Error> {
         .install_default()
         .expect("Failed to install rustls crypto provider");
 
-    let app_env = std::env::var("APP_ENV").unwrap_or_default();
     let config = Config::infer().await?;
     tracing::info!("kubernetes cluster url {}", config.cluster_url);
 
-    tracing::info!("App env is {}", app_env);
     Ok(KubeClient::try_from(config)?)
 }
