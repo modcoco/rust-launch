@@ -93,8 +93,6 @@ pub async fn log_level(
     Query(req): Query<RustLogLevel>,
     Extension(reload_log_handle): Extension<ReloadLogLevelHandle>,
 ) -> Result<impl IntoResponse, AxumErr> {
-    tracing::info!("test");
-    tracing::debug!("test");
     let level = match req.level.to_lowercase().as_str() {
         "trace" => LogLevel::Trace,
         "debug" => LogLevel::Debug,

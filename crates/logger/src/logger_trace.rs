@@ -1,5 +1,3 @@
-use axum::extract::Extension;
-use axum::extract::Query;
 use chrono::Local;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -56,7 +54,7 @@ pub fn init_logger(
     log_to_file: bool,
 ) -> (Option<WorkerGuard>, ReloadLogLevelHandle) {
     let default_filter = tracing_subscriber::EnvFilter::new(
-        std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
+        std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
     );
     let (filter, reload_handle) = tracing_subscriber::reload::Layer::new(default_filter);
 
@@ -110,23 +108,6 @@ fn main() {
 }
 
 // WEB
-#[derive(serde::Deserialize)]
-pub struct LevelFlag {
-    level: String,
-}
-pub async fn change_log_level(
-    Query(flag): Query<LevelFlag>,
-    Extension(reload_handle): Extension<ReloadLogLevelHandle>,
-) -> String {
-    match flag.level.parse::<EnvFilter>() {
-        Ok(env_filter) => {
-            reload_handle.modify(|filter| *filter = env_filter).unwrap();
-            "ok".to_string()
-        }
-        Err(err) => err.to_string(),
-    }
-}
-
 pub enum LogLevel {
     Trace,
     Debug,
@@ -137,9 +118,9 @@ pub enum LogLevel {
 
 pub async fn setup_log_level(
     level: LogLevel,
-    reload_handle: ReloadLogLevelHandle,
+    reload_log_handle: ReloadLogLevelHandle,
 ) -> Result<String, anyhow::Error> {
-    let level_str = match level {
+    let level_flag = match level {
         LogLevel::Trace => "trace",
         LogLevel::Debug => "debug",
         LogLevel::Info => "info",
@@ -147,9 +128,10 @@ pub async fn setup_log_level(
         LogLevel::Error => "error",
     };
 
-    let env_filter = EnvFilter::try_new(level_str)?;
-    reload_handle.modify(|filter| *filter = env_filter)?;
+    let env_filter = EnvFilter::try_new(level_flag)?;
+    reload_log_handle.modify(|filter| *filter = env_filter)?;
 
+    std::env::set_var("RUST_LOG", level_flag);
     let rust_log = match std::env::var("RUST_LOG") {
         Ok(current_log_level) => current_log_level,
         Err(_) => "unknown".to_owned(),
@@ -157,13 +139,6 @@ pub async fn setup_log_level(
 
     Ok(rust_log)
 }
-
-// CMD
-// export RUST_LOG=debug
-// let reload_handle = logger::logger_trace::init_logger();
-// std::env::set_var("RUST_LOG", "info");
-// let new_filter = tracing_subscriber::EnvFilter::from_default_env();
-// _ = reload_handle.reload(new_filter);
 
 #[cfg(target_os = "linux")]
 fn is_root() -> bool {
