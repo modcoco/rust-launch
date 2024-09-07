@@ -107,7 +107,6 @@ fn main() {
     tracing::info!("This is not an example");
 }
 
-// WEB
 pub enum LogLevel {
     Trace,
     Debug,
@@ -116,28 +115,40 @@ pub enum LogLevel {
     Error,
 }
 
-pub async fn setup_log_level(
-    level: LogLevel,
-    reload_log_handle: ReloadLogLevelHandle,
-) -> Result<String, anyhow::Error> {
-    let level_flag = match level {
-        LogLevel::Trace => "trace",
-        LogLevel::Debug => "debug",
-        LogLevel::Info => "info",
-        LogLevel::Warn => "warn",
-        LogLevel::Error => "error",
-    };
+impl LogLevel {
+    pub async fn setup_log_level(
+        level: LogLevel,
+        reload_log_handle: ReloadLogLevelHandle,
+    ) -> Result<String, anyhow::Error> {
+        let level_flag = match level {
+            LogLevel::Trace => "trace",
+            LogLevel::Debug => "debug",
+            LogLevel::Info => "info",
+            LogLevel::Warn => "warn",
+            LogLevel::Error => "error",
+        };
 
-    let env_filter = EnvFilter::try_new(level_flag)?;
-    reload_log_handle.modify(|filter| *filter = env_filter)?;
+        let env_filter = EnvFilter::try_new(level_flag)?;
+        reload_log_handle.modify(|filter| *filter = env_filter)?;
 
-    std::env::set_var("RUST_LOG", level_flag);
-    let rust_log = match std::env::var("RUST_LOG") {
-        Ok(current_log_level) => current_log_level,
-        Err(_) => "unknown".to_owned(),
-    };
+        std::env::set_var("RUST_LOG", level_flag);
+        let rust_log = match std::env::var("RUST_LOG") {
+            Ok(current_log_level) => current_log_level,
+            Err(_) => "unknown".to_owned(),
+        };
 
-    Ok(rust_log)
+        Ok(rust_log)
+    }
+    pub fn decode_log_level(level: &str) -> Self {
+        match level.to_lowercase().as_str() {
+            "trace" => LogLevel::Trace,
+            "debug" => LogLevel::Debug,
+            "info" => LogLevel::Info,
+            "warn" => LogLevel::Warn,
+            "error" => LogLevel::Error,
+            _ => LogLevel::Info,
+        }
+    }
 }
 
 #[cfg(target_os = "linux")]

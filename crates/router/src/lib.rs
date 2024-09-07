@@ -8,7 +8,7 @@ use axum::{
 };
 use context::AppContext;
 use health_check::{SystemDependencies, SystemInfo, SystemResources, SystemStatus};
-use logger::logger_trace::{setup_log_level, LogLevel, ReloadLogLevelHandle};
+use logger::logger_trace::{LogLevel, ReloadLogLevelHandle};
 use sqlx::Row;
 use tokio::net::TcpListener;
 use utils::err::AxumErr;
@@ -93,14 +93,7 @@ pub async fn log_level(
     Query(req): Query<RustLogLevel>,
     Extension(reload_log_handle): Extension<ReloadLogLevelHandle>,
 ) -> Result<impl IntoResponse, AxumErr> {
-    let level = match req.level.to_lowercase().as_str() {
-        "trace" => LogLevel::Trace,
-        "debug" => LogLevel::Debug,
-        "info" => LogLevel::Info,
-        "warn" => LogLevel::Warn,
-        "error" => LogLevel::Error,
-        _ => LogLevel::Info,
-    };
-    let current_log_level = setup_log_level(level, reload_log_handle).await?;
+    let level = LogLevel::decode_log_level(&req.level);
+    let current_log_level = LogLevel::setup_log_level(level, reload_log_handle).await?;
     Ok(Json(current_log_level))
 }
