@@ -54,7 +54,7 @@ impl FormatTime for LocalTimer {
 pub fn init_logger(
     app_name: &str,
     log_to_file: bool,
-) -> (ReloadLogLevelHandle, Option<WorkerGuard>) {
+) -> (Option<WorkerGuard>, ReloadLogLevelHandle) {
     let default_filter = tracing_subscriber::EnvFilter::new(
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
     );
@@ -95,7 +95,7 @@ pub fn init_logger(
     };
 
     tracing::info!("Logger initialized");
-    (reload_handle, guard)
+    (guard, reload_handle)
 }
 
 #[allow(dead_code)]
@@ -125,6 +125,37 @@ pub async fn change_log_level(
         }
         Err(err) => err.to_string(),
     }
+}
+
+pub enum LogLevel {
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+}
+
+pub async fn setup_log_level(
+    level: LogLevel,
+    reload_handle: ReloadLogLevelHandle,
+) -> Result<String, anyhow::Error> {
+    let level_str = match level {
+        LogLevel::Trace => "trace",
+        LogLevel::Debug => "debug",
+        LogLevel::Info => "info",
+        LogLevel::Warn => "warn",
+        LogLevel::Error => "error",
+    };
+
+    let env_filter = EnvFilter::try_new(level_str)?;
+    reload_handle.modify(|filter| *filter = env_filter)?;
+
+    let rust_log = match std::env::var("RUST_LOG") {
+        Ok(current_log_level) => current_log_level,
+        Err(_) => "unknown".to_owned(),
+    };
+
+    Ok(rust_log)
 }
 
 // CMD

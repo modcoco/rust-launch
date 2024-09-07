@@ -17,6 +17,7 @@ sysinfo.workspace = true
 num-format.workspace = true
 sqlx.workspace = true
 serde.workspace = true
+logger.workspace = true
 
 [dev-dependencies]
 tokio.workspace = true

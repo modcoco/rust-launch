@@ -1,17 +1,22 @@
 mod health_check;
 
 use axum::{
+    extract::Query,
     response::IntoResponse,
-    routing::{on, MethodFilter},
+    routing::{get, on, MethodFilter},
     Extension, Json, Router,
 };
 use context::AppContext;
 use health_check::{SystemDependencies, SystemInfo, SystemResources, SystemStatus};
+use logger::logger_trace::{setup_log_level, LogLevel, ReloadLogLevelHandle};
 use sqlx::Row;
 use tokio::net::TcpListener;
 use utils::err::AxumErr;
 
-pub async fn init_router(ctx: AppContext) -> Result<(TcpListener, Router), anyhow::Error> {
+pub async fn init_router(
+    ctx: AppContext,
+    log_handle: ReloadLogLevelHandle,
+) -> Result<(TcpListener, Router), anyhow::Error> {
     let cfg = config::get_config();
     let addr = format!("{}:{}", cfg.web_listen_addr, cfg.web_listen_port);
     tracing::info!("start web server {}", addr);
@@ -19,8 +24,18 @@ pub async fn init_router(ctx: AppContext) -> Result<(TcpListener, Router), anyho
     Ok((
         listener,
         Router::new()
-            .route("/info", on(MethodFilter::GET, info_checker))
-            .layer(Extension(ctx)),
+            .nest(
+                "/api/v2",
+                Router::new()
+                    .route("/info", on(MethodFilter::GET, info_checker))
+                    .layer(Extension(ctx)),
+            )
+            .nest(
+                "/api/v2",
+                Router::new()
+                    .route("/log-level", get(log_level))
+                    .layer(Extension(log_handle)),
+            ),
     ))
 }
 
@@ -68,4 +83,26 @@ pub async fn info_checker(
     };
 
     Ok(Json(status))
+}
+
+#[derive(serde::Deserialize)]
+pub struct RustLogLevel {
+    pub level: String,
+}
+pub async fn log_level(
+    Query(req): Query<RustLogLevel>,
+    Extension(reload_log_handle): Extension<ReloadLogLevelHandle>,
+) -> Result<impl IntoResponse, AxumErr> {
+    tracing::info!("test");
+    tracing::debug!("test");
+    let level = match req.level.to_lowercase().as_str() {
+        "trace" => LogLevel::Trace,
+        "debug" => LogLevel::Debug,
+        "info" => LogLevel::Info,
+        "warn" => LogLevel::Warn,
+        "error" => LogLevel::Error,
+        _ => LogLevel::Info,
+    };
+    let current_log_level = setup_log_level(level, reload_log_handle).await?;
+    Ok(Json(current_log_level))
 }

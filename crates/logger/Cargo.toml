@@ -16,3 +16,4 @@ axum.workspace = true
 tokio.workspace = true
 tracing-appender.workspace = true
 libc.workspace = true
+anyhow.workspace = true
