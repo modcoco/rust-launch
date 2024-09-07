@@ -32,6 +32,8 @@ pub struct SystemStatus {
     pub dependencies: SystemDependencies,
 }
 
+#[derive(Debug, Default, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SystemInfo {
     pub pid: String,
     pub cpu_count: String,

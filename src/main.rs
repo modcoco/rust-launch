@@ -1,8 +1,7 @@
 use axum::{self};
 use context::AppContext;
 use logger::logger_trace::init_logger;
-use router::init_router;
-use rust_boot::utils;
+use rust_boot::{router::init_router, utils};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {

@@ -12,6 +12,13 @@ tracing.workspace = true
 router.workspace = true
 config.workspace = true
 context.workspace = true
+utils.workspace = true
+serde_json.workspace = true
+sysinfo.workspace = true
+num-format.workspace = true
+sqlx.workspace = true
+serde.workspace = true
+kube.workspace = true
 
 [dev-dependencies]
 sqlx.workspace = true
