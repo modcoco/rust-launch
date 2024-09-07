@@ -1,4 +1,5 @@
 use axum::{
+    http::{StatusCode, Uri},
     routing::{get, on, MethodFilter},
     Extension, Router,
 };
@@ -33,6 +34,11 @@ pub async fn init_router(
                     .route("/log-level", get(log_level))
                     .layer(Extension(log_handle)),
             )
-            .nest("/api/v2", crate_router),
+            .nest("/api/v2", crate_router)
+            .fallback(fallback),
     ))
+}
+
+async fn fallback(uri: Uri) -> (StatusCode, String) {
+    (StatusCode::NOT_FOUND, format!("No route for {uri}"))
 }
