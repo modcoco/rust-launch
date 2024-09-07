@@ -96,17 +96,6 @@ pub fn init_logger(
     (guard, reload_handle)
 }
 
-#[allow(dead_code)]
-#[test]
-fn main() {
-    let (_handle, _guard) = init_logger("test_boot", false);
-
-    tracing::info!("Client test");
-
-    // drop(guard);
-    tracing::info!("This is not an example");
-}
-
 pub enum LogLevel {
     Trace,
     Debug,
