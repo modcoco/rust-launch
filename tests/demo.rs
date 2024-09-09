@@ -8,8 +8,9 @@ fn to_gb(value: i64) -> i64 {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
+
+    use super::*;
 
     #[test]
     fn it_works() {

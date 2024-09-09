@@ -31,8 +31,8 @@ use thiserror::Error;
 use tracing::error;
 // use vaultrs::sys::ServerStatus;
 
-///handler for error in the http service
-///it convert the recevied error in a response
+/// handler for error in the http service
+/// it convert the recevied error in a response
 /// https://github.com/w6d-io/docker-opa
 #[derive(Error, Debug)]
 pub enum RouterError {
@@ -46,7 +46,7 @@ pub enum RouterError {
     EmptyResponse,
 }
 
-#[cfg(not(tarpaulin_include))]
+// #[cfg(not(tarpaulin_include))]
 impl IntoResponse for RouterError {
     fn into_response(self) -> Response {
         match self {

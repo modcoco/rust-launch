@@ -1,6 +1,5 @@
 use regex::Regex;
-use sqlx::postgres::PgPoolOptions;
-use sqlx::PgPool;
+use sqlx::{postgres::PgPoolOptions, PgPool};
 
 pub async fn create_pg_pool() -> PgPool {
     let cfg = config::get_config();

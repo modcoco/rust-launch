@@ -1,15 +1,18 @@
+use std::{path::PathBuf, sync::Arc};
+
 use chrono::Local;
-use std::path::PathBuf;
-use std::sync::Arc;
 use tokio::time::Instant;
 use tracing::Level;
-use tracing_appender::non_blocking::WorkerGuard;
-use tracing_appender::rolling::RollingFileAppender;
-use tracing_appender::rolling::Rotation;
-use tracing_subscriber::fmt::{format::Writer, time::FormatTime};
-use tracing_subscriber::layer::SubscriberExt as _;
-use tracing_subscriber::util::SubscriberInitExt as _;
-use tracing_subscriber::EnvFilter;
+use tracing_appender::{
+    non_blocking::WorkerGuard,
+    rolling::{RollingFileAppender, Rotation},
+};
+use tracing_subscriber::{
+    fmt::{format::Writer, time::FormatTime},
+    layer::SubscriberExt as _,
+    util::SubscriberInitExt as _,
+    EnvFilter,
+};
 
 pub type ReloadLogLevelHandle =
     tracing_subscriber::reload::Handle<tracing_subscriber::EnvFilter, tracing_subscriber::Registry>;

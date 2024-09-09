@@ -1,9 +1,9 @@
+use std::{env, sync::Arc};
+
 use arc_swap::ArcSwap;
 use dotenv::dotenv;
 use once_cell::sync::Lazy;
 use serde::Deserialize;
-use std::env;
-use std::sync::Arc;
 
 static CONFIG: Lazy<ArcSwap<Config>> = Lazy::new(|| ArcSwap::from(Arc::new(Config::from_env())));
 

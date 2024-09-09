@@ -1,9 +1,7 @@
-use std::io::Write;
-use std::thread;
+use std::{io::Write, thread};
 
 use chrono::{DateTime, Local};
-use env_logger::fmt::Formatter;
-use env_logger::Builder;
+use env_logger::{fmt::Formatter, Builder};
 use log::{LevelFilter, Record};
 
 pub fn setup_logger(log_thread: bool, rust_log: Option<&str>) {

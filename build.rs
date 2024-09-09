@@ -1,5 +1,6 @@
-use chrono::{DateTime, SecondsFormat, Utc};
 use std::{io::Result, process::Command};
+
+use chrono::{DateTime, SecondsFormat, Utc};
 
 fn main() -> Result<()> {
     println!("cargo:rerun-if-changed=build.rs");

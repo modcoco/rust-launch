@@ -1,7 +1,8 @@
 #![deny(unused_crate_dependencies)]
+use std::{fmt::Display, str::FromStr};
+
 use chrono::{self, NaiveDateTime, TimeZone as _};
 use serde::{self, Deserialize, Deserializer, Serializer};
-use std::{fmt::Display, str::FromStr};
 
 pub mod constants;
 pub mod err;

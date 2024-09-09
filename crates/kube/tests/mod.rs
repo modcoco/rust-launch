@@ -1,17 +1,12 @@
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-    use std::process::Command;
+    use std::{collections::HashMap, process::Command};
 
     use axum::http::HeaderMap;
-    use k8s_openapi::api::core::v1::Pod;
-    use k8s_openapi::api::core::v1::{ConfigMap, Namespace};
+    use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Pod};
     use kube::ServiceAccountToken;
     use kube_runtime::{api::ListParams, Api, Client as KubeClient, Config};
-    use reqwest::blocking::Client;
-    use reqwest::header::AUTHORIZATION;
-    use reqwest::Certificate;
-
+    use reqwest::{blocking::Client, header::AUTHORIZATION, Certificate};
     use utils::url_https_builder;
 
     #[test]
