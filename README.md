@@ -35,3 +35,19 @@ cargo deny init
 cargo deny check
 
 ```
+
+```bash
+sudo apt-get install build-essential
+sudo apt-get update
+sudo apt-get install gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+export OPENSSL_DIR=/usr/lib/aarch64-linux-gnu
+export OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu
+export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
+
+export PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu
+export PKG_CONFIG_PATH=/usr/aarch64-linux-gnu/lib/pkgconfig:/usr/share/pkgconfig
+export OPENSSL_DIR=/usr/lib/aarch64-linux-gnu
+export OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu
+export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
+
+```
