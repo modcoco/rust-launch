@@ -27,3 +27,11 @@ rustup target add aarch64-unknown-linux-gnu
 cargo build --target aarch64-unknown-linux-gnu --release
 
 ```
+
+## Security
+```bash
+cargo install --locked cargo-deny
+cargo deny init
+cargo deny check
+
+```
