@@ -44,10 +44,18 @@ export OPENSSL_DIR=/usr/lib/aarch64-linux-gnu
 export OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu
 export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
 
-export PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu
-export PKG_CONFIG_PATH=/usr/aarch64-linux-gnu/lib/pkgconfig:/usr/share/pkgconfig
-export OPENSSL_DIR=/usr/lib/aarch64-linux-gnu
-export OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu
-export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
+CROSS_COMPILE=aarch64-linux-gnu cargo build --release --target aarch64-unknown-linux-gnu
 
+export OPENSSL_LIB_DIR=$(brew --prefix openssl)/lib 
+export OPENSSL_INCLUDE_DIR=$(brew --prefix openssl)/include
+
+export OPENSSL_DIR=/usr/
+export OPENSSL_LIB_DIR=/usr/aarch64-linux-gnu/
+
+export OPENSSL_LIB_DIR=/usr/aarch64-linux-gnu/lib
+export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
+export PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu
+
+sudo ln -s /usr/include/x86_64-linux-gnu/openssl/opensslconf.h /usr/include/openssl/opensslconf.h
+sudo ln -s /usr/include/x86_64-linux-gnu/openssl/configuration.h /usr/include/openssl/configuration.h
 ```
