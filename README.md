@@ -34,10 +34,12 @@ sudo apt-get install build-essential gdb-multiarch -y
 sudo apt-get install binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu libc6-dev-arm64-cross -y
 aarch64-linux-gnu-gcc --version
 
-# Set aarach env, build aarach64 openssl, the project need it.
+# Ser aarach basic env
 export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
 export AR_aarch64_unknown_linux_gnu=aarch64-linux-gnu-ar
 export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
+
+# Set aarach env, build aarach64 openssl, the openssl project need it.
 export OPENSSL_LIB_DIR=/usr/aarch64-linux-gnu/lib
 export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
 
