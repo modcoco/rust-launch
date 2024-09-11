@@ -21,30 +21,32 @@ rustup target add x86_64-unknown-linux-gnu
 cargo build --target x86_64-unknown-linux-gnu --release
 
 # Build aarch64
-sudo apt-get install gcc-aarch64-linux-gnu
-aarch64-linux-gnu-gcc --version
 rustup target add aarch64-unknown-linux-gnu
 cargo build --target aarch64-unknown-linux-gnu --release
 
 ```
 
-## Cross compilation help
+## Cross compilation aarch64 help
 This explanation covers the main steps and key components of cross-compiling for AArch64.
 ```bash
-# Install base tool
-sudo apt-get install build-essential gcc-aarch64-linux-gnu libc6-dev-arm64-cross -y
-# Set aarach env
+# Install base aarch64 tool
+sudo apt-get install build-essential gdb-multiarch -y
+sudo apt-get install binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu libc6-dev-arm64-cross -y
+aarch64-linux-gnu-gcc --version
+
+# Set aarach env, build aarach64 openssl, the project need it.
 export CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc
 export AR_aarch64_unknown_linux_gnu=aarch64-linux-gnu-ar
 export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
 export OPENSSL_LIB_DIR=/usr/aarch64-linux-gnu/lib
 export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
+
 # Cross build aarach openssl
 wget https://www.openssl.org/source/openssl-1.1.1l.tar.gz
 ./Configure linux-aarch64 --cross-compile-prefix=aarch64-linux-gnu-
 make && sudo make install DESTDIR=/usr/aarch64-linux-gnu
 
-# Use linux aarach base and aarach openssl
+# Use linux aarach base and aarach openssl, then build
 export OPENSSL_LIB_DIR=/usr/aarch64-linux-gnu/usr/local/lib
 export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/usr/local/include
 
