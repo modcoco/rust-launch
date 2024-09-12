@@ -26,6 +26,25 @@ cargo build --target aarch64-unknown-linux-gnu --release
 
 ```
 
+## Build image
+```bash
+docker buildx build --platform linux/amd64 \
+    -t rust-launch:v1 \
+    -f container/Dockerfile.gnu \
+    --push .
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+    -t rust-launch:v1 \
+    -f container/Dockerfile.gnu \
+    --push .
+
+docker buildx build --platform linux/amd64,linux/arm64 \
+    -t rust-launch:v1 \
+    -f container/Dockerfile.gnu \
+    --output type=oci,dest=rust-app.tar .
+
+```
+
 ## Cross compilation aarch64 help
 This explanation covers the main steps and key components of cross-compiling for AArch64.
 ```bash
@@ -46,7 +65,7 @@ export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/include
 # Cross build aarach openssl
 wget https://www.openssl.org/source/openssl-1.1.1l.tar.gz
 ./Configure linux-aarch64 --cross-compile-prefix=aarch64-linux-gnu-
-make && sudo make install DESTDIR=/usr/aarch64-linux-gnu
+make && make install DESTDIR=/usr/aarch64-linux-gnu
 
 # Use linux aarach base and aarach openssl, then build
 export OPENSSL_LIB_DIR=/usr/aarch64-linux-gnu/usr/local/lib
