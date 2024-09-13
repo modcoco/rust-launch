@@ -17,7 +17,7 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 RUN if [ "${TARGETARCH}" = "amd64" ]; then \
         wget https://musl.cc/x86_64-linux-musl-cross.tgz; \
-        tar -zxvf x86_64-linux-musl-cross.tgz -C /usr; \   aarch64-linux-musl-cross.tgz 
+        tar -zxvf x86_64-linux-musl-cross.tgz -C /usr; \
         export PATH=$PATH:/usr/x86_64-linux-musl-cross/bin; \
         export CC_x86_64_unknown_linux_musl=x86_64-linux-musl-gcc; \
         export AR_x86_64_unknown_linux_musl=x86_64-linux-musl-ar; \
@@ -35,17 +35,19 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
     elif [ "${TARGETARCH}" = "arm64" ]; then \
         wget https://musl.cc/aarch64-linux-musl-cross.tgz; \
         tar -zxvf aarch64-linux-musl-cross.tgz  -C /usr; \
+        export PATH=$PATH:/usr/aarch64-linux-musl-cross/bin; \
         export CC_aarch64_unknown_linux_gnu=aarch64-linux-musl-gcc; \
         export AR_aarch64_unknown_linux_gnu=aarch64-linux-musl-ar; \
-        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-musl-gcc; \
-        export OPENSSL_LIB_DIR=/usr/aarch64-linux-musl/lib; \
-        export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-musl/include; \
+        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc; \
+        export OPENSSL_LIB_DIR=/usr/aarch64-linux-musl-cross/lib; \
+        export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-musl-cross/include; \
         wget https://www.openssl.org/source/openssl-1.1.1l.tar.gz; \
         tar -xzf openssl-1.1.1l.tar.gz; \
-        (cd openssl-1.1.1l &&./Configure linux-aarch64 --cross-compile-prefix=aarch64-linux-musl- && make && make install DESTDIR=/usr/aarch64-linux-musl); \
-        export OPENSSL_LIB_DIR=/usr/aarch64-linux-musl/usr/local/lib; \
-        export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-musl/usr/local/include; \
+        (cd openssl-1.1.1l &&./Configure linux-aarch64 --cross-compile-prefix=aarch64-linux-musl- && make && make install DESTDIR=/usr/aarch64-linux-musl-cross); \
+        export OPENSSL_LIB_DIR=/usr/aarch64-linux-musl-cross/usr/local/lib; \
+        export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-musl-cross/usr/local/include; \
         export TARGET_TRIPLE=aarch64-unknown-linux-musl; \
+        . "$HOME/.cargo/env"; \
         rustup target add aarch64-unknown-linux-musl; \
     fi && \
     cargo update &&\

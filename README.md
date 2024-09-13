@@ -1,4 +1,5 @@
 ## How to run or build
+
 ```bash
 # Run
 cargo run
@@ -27,30 +28,33 @@ cargo build --target aarch64-unknown-linux-gnu --release
 ```
 
 ## Build image
+
+### GNU
+
 ```bash
-docker buildx build --platform linux/amd64 \
-    -t rust-launch:v1 \
-    -f container/Dockerfile.gnu \
-    --push .
-
 docker buildx build --platform linux/amd64,linux/arm64 \
     -t rust-launch:v1 \
     -f container/Dockerfile.gnu \
-    --push .
-
-docker buildx build --platform linux/amd64,linux/arm64 \
-    -t rust-launch:v1 \
-    -f container/Dockerfile.gnu \
-    --output type=oci,dest=rust-app.tar .
-
-docker buildx build --platform linux/amd64 \
-    -t rust-launch:musl \
-    -f container/Dockerfile.musl \
+    --output type=oci,dest=rust-app.tar \
     .
+
+```
+
+### MUSL
+
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 \
+    -t rust-launch:v1 \
+    -f container/Dockerfile.musl \
+    --output type=oci,dest=rust-app.tar \
+    .
+
 ```
 
 ## Cross compilation aarch64 help
+
 This explanation covers the main steps and key components of cross-compiling for AArch64.
+
 ```bash
 # Install base aarch64 tool
 sudo apt-get install build-essential gdb-multiarch -y
@@ -78,6 +82,7 @@ export OPENSSL_INCLUDE_DIR=/usr/aarch64-linux-gnu/usr/local/include
 ```
 
 ## Security
+
 ```bash
 cargo install --locked cargo-deny
 cargo deny init
