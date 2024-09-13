@@ -81,8 +81,8 @@ pub fn init_logger(
         let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
         let file_layer = tracing_subscriber::fmt::layer()
             .with_line_number(true)
-            .with_thread_ids(true)
-            .with_thread_names(true)
+            // .with_thread_ids(true)
+            // .with_thread_names(true)
             .with_level(true)
             .with_target(true)
             .with_writer(non_blocking)
