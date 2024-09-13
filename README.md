@@ -35,7 +35,7 @@ cargo build --target aarch64-unknown-linux-gnu --release
 docker buildx build --platform linux/amd64,linux/arm64 \
     -t rust-launch:v1 \
     -f container/Dockerfile.gnu \
-    --output type=oci,dest=rust-app.tar \
+    --output type=oci,dest=rust-app_v1.tar \
     .
 
 ```
@@ -46,7 +46,7 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 docker buildx build --platform linux/amd64,linux/arm64 \
     -t rust-launch:v1 \
     -f container/Dockerfile.musl \
-    --output type=oci,dest=rust-app.tar \
+    --output type=oci,dest=rust-app_v1.tar \
     .
 
 ```
