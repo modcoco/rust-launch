@@ -43,6 +43,10 @@ docker buildx build --platform linux/amd64,linux/arm64 \
     -f container/Dockerfile.gnu \
     --output type=oci,dest=rust-app.tar .
 
+docker buildx build --platform linux/amd64 \
+    -t rust-launch:musl \
+    -f container/Dockerfile.musl \
+    .
 ```
 
 ## Cross compilation aarch64 help

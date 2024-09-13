@@ -1,15 +1,40 @@
-FROM --platform=$BUILDPLATFORM rust:1.81.0 AS builder
+FROM --platform=$BUILDPLATFORM alpine:20240807 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /workspace
 COPY . .
+
+RUN apk update && apk add --no-cache \
+    perl \
+    make \
+    curl \
+    libgcc \
+    gcc \
+    musl-dev \
+    git
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
 RUN if [ "${TARGETARCH}" = "amd64" ]; then \
+        wget https://musl.cc/x86_64-linux-musl-cross.tgz; \
+        tar -zxvf x86_64-linux-musl-cross.tgz -C /usr; \   aarch64-linux-musl-cross.tgz 
+        export PATH=$PATH:/usr/x86_64-linux-musl-cross/bin; \
+        export CC_x86_64_unknown_linux_musl=x86_64-linux-musl-gcc; \
+        export AR_x86_64_unknown_linux_musl=x86_64-linux-musl-ar; \
+        export CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=x86_64-linux-musl-gcc; \
+        export OPENSSL_LIB_DIR=/usr/x86_64-linux-musl-cross/lib; \
+        export OPENSSL_INCLUDE_DIR=/usr/x86_64-linux-musl-cross/include; \
+        wget https://www.openssl.org/source/openssl-1.1.1l.tar.gz; \
+        tar -xzf openssl-1.1.1l.tar.gz; \
+        (cd openssl-1.1.1l &&./Configure linux-x86_64 --cross-compile-prefix=x86_64-linux-musl- && make && make install DESTDIR=/usr/x86_64-linux-musl-cross); \
+        export OPENSSL_LIB_DIR=/usr/x86_64-linux-musl-cross/usr/local/lib; \
+        export OPENSSL_INCLUDE_DIR=/usr/x86_64-linux-musl-cross/usr/local/include; \
         export TARGET_TRIPLE=x86_64-unknown-linux-musl; \
+        . "$HOME/.cargo/env"; \
         rustup target add x86_64-unknown-linux-musl; \
     elif [ "${TARGETARCH}" = "arm64" ]; then \
-        apt-get update; \
-        apt-get install build-essential gdb-multiarch -y; \
-        apt-get install binutils-aarch64-linux-musl gcc-aarch64-linux-musl libc6-dev-arm64-cross -y; \
+        wget https://musl.cc/aarch64-linux-musl-cross.tgz; \
+        tar -zxvf aarch64-linux-musl-cross.tgz  -C /usr; \
         export CC_aarch64_unknown_linux_gnu=aarch64-linux-musl-gcc; \
         export AR_aarch64_unknown_linux_gnu=aarch64-linux-musl-ar; \
         export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-musl-gcc; \
@@ -27,11 +52,9 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
     cargo build --release --target ${TARGET_TRIPLE} && \
     cp /workspace/target/${TARGET_TRIPLE}/release/rust_boot /workspace/target/rust_boot
 
-FROM debian:bookworm-20240904-slim
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-RUN useradd -m app
+FROM alpine:3.20
+RUN apk update && apk add --no-cache ca-certificates
+RUN adduser -D app
 WORKDIR /home/app
 COPY --from=builder /workspace/target/rust_boot /bin
 COPY --from=builder /workspace/.kube .kube
