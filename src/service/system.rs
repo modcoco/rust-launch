@@ -10,7 +10,7 @@ pub async fn info_checker_logic(ctx: AppContext) -> Result<SystemStatus, anyhow:
     let pkg_name = std::env::var("CARGO_MAIN_PKG_NAME").unwrap_or("unknown".to_string());
     let pkg_version = std::env::var("CARGO_MAIN_PKG_VERSION").unwrap_or("unknown".to_owned());
     let client = ctx.kube_client;
-    let kube_version_info: Option<kube::k8s_openapi::apimachinery::pkg::version::Info> =
+    let kube_version_info: Option<kube_runtime::k8s_openapi::apimachinery::pkg::version::Info> =
         match client.apiserver_version().await {
             Ok(info) => Some(info),
             Err(_) => None,

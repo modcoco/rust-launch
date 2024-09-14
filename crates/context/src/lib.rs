@@ -3,14 +3,14 @@ mod postgres;
 use std::time::Instant;
 
 use chrono::{DateTime, NaiveDateTime, Utc};
-use kube_runtime::{init_kube_client, kube_runtime, Client as KubeClient};
+use kube_runtime::{init_kube_client, kube::Client};
 use sqlx::PgPool;
 
 use crate::postgres::create_pg_pool;
 
 #[derive(Clone)]
 pub struct AppContext {
-    pub kube_client: KubeClient,
+    pub kube_client: Client,
     pub pg_pool: PgPool,
     pub start_time: NaiveDateTime,
     pub running_time: Instant,

@@ -16,7 +16,7 @@ pub struct SystemResources {
 #[serde(rename_all = "camelCase")]
 pub struct SystemDependencies {
     pub database: Option<String>,
-    pub kubernetes: Option<kube::k8s_openapi::apimachinery::pkg::version::Info>,
+    pub kubernetes: Option<kube_runtime::k8s_openapi::apimachinery::pkg::version::Info>,
 }
 
 #[derive(Serialize, Deserialize)]
