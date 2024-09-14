@@ -53,10 +53,11 @@ impl FormatTime for LocalTimer {
 }
 
 pub fn init_logger(app_name: &str) -> (Option<WorkerGuard>, ReloadLogLevelHandle) {
-    let default_filter = tracing_subscriber::EnvFilter::new(
+    let default_stdout_filter = tracing_subscriber::EnvFilter::new(
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
     );
-    let (filter, reload_handle) = tracing_subscriber::reload::Layer::new(default_filter);
+    let (stdout_filter, reload_handle) =
+        tracing_subscriber::reload::Layer::new(default_stdout_filter);
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_line_number(true)
@@ -80,7 +81,7 @@ pub fn init_logger(app_name: &str) -> (Option<WorkerGuard>, ReloadLogLevelHandle
         .with_timer(LocalTimer);
 
     let _ = tracing_subscriber::registry()
-        .with(filter)
+        .with(stdout_filter)
         .with(stdout_layer)
         .with(file_layer)
         .try_init();
