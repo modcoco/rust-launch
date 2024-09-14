@@ -11,10 +11,10 @@ use tracing_subscriber::{
     fmt,
     fmt::{format::Writer, time::FormatTime},
     layer::{Layered, SubscriberExt as _},
-    reload::Handle,
     util::SubscriberInitExt as _,
-    EnvFilter, Registry,
+    Registry,
 };
+pub use tracing_subscriber::{reload::Handle, EnvFilter};
 
 pub type FileLogReloadLayer = Layered<
     fmt::Layer<
@@ -25,8 +25,15 @@ pub type FileLogReloadLayer = Layered<
     Layered<tracing_subscriber::reload::Layer<EnvFilter, Registry>, Registry>,
 >;
 
-pub type ReloadLogLevelHandle =
+pub type StdoutReloadLogLevelHandle =
     tracing_subscriber::reload::Handle<tracing_subscriber::EnvFilter, tracing_subscriber::Registry>;
+
+pub type FileReloadLogLevelHandle = Handle<EnvFilter, FileLogReloadLayer>;
+
+pub struct LogLevelHandles {
+    pub stdout_handle: StdoutReloadLogLevelHandle,
+    pub file_handle: FileReloadLogLevelHandle,
+}
 
 pub fn setup_logger() -> Arc<tokio::time::Instant> {
     let start_time = Instant::now();
@@ -63,14 +70,7 @@ impl FormatTime for LocalTimer {
     }
 }
 
-pub fn init_logger(
-    app_name: &str,
-    log_to_file: bool,
-) -> (
-    Option<WorkerGuard>,
-    ReloadLogLevelHandle,
-    Handle<EnvFilter, FileLogReloadLayer>,
-) {
+pub fn init_logger(app_name: &str, log_to_file: bool) -> (Option<WorkerGuard>, LogLevelHandles) {
     let stdout_default_filter = tracing_subscriber::EnvFilter::new(
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
     );
@@ -117,7 +117,13 @@ pub fn init_logger(
     };
 
     tracing::info!("Logger initialized");
-    (guard, reload_handle, file_reload_handle)
+    (
+        guard,
+        LogLevelHandles {
+            stdout_handle: reload_handle,
+            file_handle: file_reload_handle,
+        },
+    )
 }
 
 pub enum LogLevel {
@@ -129,9 +135,9 @@ pub enum LogLevel {
 }
 
 impl LogLevel {
-    pub async fn setup_log_level(
+    pub async fn setup_stdout_log_level(
         level: LogLevel,
-        reload_log_handle: ReloadLogLevelHandle,
+        reload_log_handle: StdoutReloadLogLevelHandle,
     ) -> Result<String, anyhow::Error> {
         let level_flag = match level {
             LogLevel::Trace => "trace",
@@ -152,6 +158,31 @@ impl LogLevel {
 
         Ok(rust_log)
     }
+
+    pub async fn setup_file_log_level(
+        level: LogLevel,
+        filelog_reload_handle: Handle<EnvFilter, FileLogReloadLayer>,
+    ) -> Result<String, anyhow::Error> {
+        let level_flag = match level {
+            LogLevel::Trace => "trace",
+            LogLevel::Debug => "debug",
+            LogLevel::Info => "info",
+            LogLevel::Warn => "info",
+            LogLevel::Error => "info",
+        };
+
+        let env_filter = EnvFilter::try_new(level_flag)?;
+        filelog_reload_handle.modify(|filter| *filter = env_filter)?;
+
+        std::env::set_var("RUST_FILE_LOG", level_flag);
+        let rust_file_log = match std::env::var("RUST_FILE_LOG") {
+            Ok(current_log_level) => current_log_level,
+            Err(_) => "unknown".to_owned(),
+        };
+
+        Ok(rust_file_log)
+    }
+
     pub fn decode_log_level(level: &str) -> Self {
         match level.to_lowercase().as_str() {
             "trace" => LogLevel::Trace,

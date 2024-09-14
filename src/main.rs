@@ -5,7 +5,7 @@ use rust_boot::{router::init_router, utils};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    let (_guard, handle, _file_log_hande) = init_logger("rust-boot", true);
+    let (_guard, handle) = init_logger("rust-boot", true);
     utils::build::show_build_info();
     let ctx = AppContext::new().await?;
     let (listener, router) = init_router(ctx, handle).await?;

@@ -43,7 +43,7 @@ mod tests {
 
     #[test]
     fn rquest_tls() -> Result<(), anyhow::Error> {
-        let (_handle, _guard, _file_handel) = logger::logger_trace::init_logger("test_kube", false);
+        let (_guard, _handle) = logger::logger_trace::init_logger("test_kube", false);
 
         let sat = ServiceAccountToken::new();
         let kubernetes_token = sat.token;
@@ -70,8 +70,7 @@ mod tests {
 
     #[test]
     fn rquest_pods() -> Result<(), anyhow::Error> {
-        let (_handle, _guard, _file_log_handle) =
-            logger::logger_trace::init_logger("test_boot", false);
+        let (_guard, _handle) = logger::logger_trace::init_logger("test_boot", false);
 
         let sat = ServiceAccountToken::new();
         let kubernetes_token = sat.token;

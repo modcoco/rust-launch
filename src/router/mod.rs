@@ -4,15 +4,15 @@ use axum::{
     Extension, Router,
 };
 use context::AppContext;
-use logger::logger_trace::ReloadLogLevelHandle;
+use logger::logger_trace::LogLevelHandles;
 use router::init_crate_router;
 use tokio::net::TcpListener;
 
-use crate::handler::http::system::{info_checker, log_level};
+use crate::handler::http::system::{file_log_level, info_checker, stdout_log_level};
 
 pub async fn init_router(
     ctx: AppContext,
-    log_handle: ReloadLogLevelHandle,
+    log_handle: LogLevelHandles,
 ) -> Result<(TcpListener, Router), anyhow::Error> {
     let cfg = config::get_config();
     let addr = format!("{}:{}", cfg.web_listen_addr, cfg.web_listen_port);
@@ -31,8 +31,14 @@ pub async fn init_router(
             .nest(
                 "/api/v2",
                 Router::new()
-                    .route("/log-level", get(log_level))
-                    .layer(Extension(log_handle)),
+                    .route("/stdout-log-level", get(stdout_log_level))
+                    .layer(Extension(log_handle.stdout_handle)),
+            )
+            .nest(
+                "/api/v2",
+                Router::new()
+                    .route("/file-log-level", get(file_log_level))
+                    .layer(Extension(log_handle.file_handle)),
             )
             .nest("/api/v2", crate_router)
             .fallback(fallback),
