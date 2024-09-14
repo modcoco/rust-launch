@@ -2,14 +2,14 @@ use logger::logger_trace::init_logger;
 
 #[test]
 fn logs_file() {
-    let (_handle, _guard) = logger::logger_trace::init_logger("test_boot", true);
+    let (_handle, _guard) = logger::logger_trace::init_logger("test_boot");
     tracing::info!("Client test");
 }
 
 #[allow(dead_code)]
 #[test]
 fn main() {
-    let (_handle, _guard) = init_logger("test_boot", false);
+    let (_handle, _guard) = init_logger("test_boot");
 
     tracing::info!("Client test");
 

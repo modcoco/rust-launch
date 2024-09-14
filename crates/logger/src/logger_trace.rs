@@ -52,10 +52,7 @@ impl FormatTime for LocalTimer {
     }
 }
 
-pub fn init_logger(
-    app_name: &str,
-    log_to_file: bool,
-) -> (Option<WorkerGuard>, ReloadLogLevelHandle) {
+pub fn init_logger(app_name: &str) -> (Option<WorkerGuard>, ReloadLogLevelHandle) {
     let default_filter = tracing_subscriber::EnvFilter::new(
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
     );
@@ -68,35 +65,28 @@ pub fn init_logger(
         .with_ansi(true)
         .with_timer(LocalTimer);
 
-    let registry = tracing_subscriber::registry()
-        .with(filter)
-        .with(stdout_layer);
+    let file_appender = RollingFileAppender::new(
+        Rotation::DAILY,
+        get_os_log_directory(app_name),
+        to_snake_case(app_name),
+    );
+    let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
+    let file_layer = tracing_subscriber::fmt::layer()
+        .with_line_number(true)
+        .with_level(true)
+        .with_target(true)
+        .with_writer(non_blocking)
+        .with_ansi(false)
+        .with_timer(LocalTimer);
 
-    let guard = if log_to_file {
-        let file_appender = RollingFileAppender::new(
-            Rotation::DAILY,
-            get_os_log_directory(app_name),
-            to_snake_case(app_name),
-        );
-        let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
-        let file_layer = tracing_subscriber::fmt::layer()
-            .with_line_number(true)
-            // .with_thread_ids(true)
-            // .with_thread_names(true)
-            .with_level(true)
-            .with_target(true)
-            .with_writer(non_blocking)
-            .with_ansi(false)
-            .with_timer(LocalTimer);
-        _ = registry.with(file_layer).try_init();
-        Some(guard)
-    } else {
-        _ = registry.try_init();
-        None
-    };
+    let _ = tracing_subscriber::registry()
+        .with(filter)
+        .with(stdout_layer)
+        .with(file_layer)
+        .try_init();
 
     tracing::info!("Logger initialized");
-    (guard, reload_handle)
+    (Some(guard), reload_handle)
 }
 
 pub enum LogLevel {
