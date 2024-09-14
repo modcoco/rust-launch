@@ -2,7 +2,6 @@ FROM rust:1.80.1-slim-bullseye AS builder
 WORKDIR /app
 COPY . .
 RUN apt-get update && apt-get install -y pkg-config libssl-dev git
-RUN cargo update
 RUN cargo build --release
 
 FROM debian:bullseye-slim

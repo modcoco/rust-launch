@@ -23,7 +23,6 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
         export TARGET_TRIPLE=aarch64-unknown-linux-gnu; \
         rustup target add aarch64-unknown-linux-gnu; \
     fi && \
-    cargo update &&\
     cargo build --release --target ${TARGET_TRIPLE} && \
     cp /workspace/target/${TARGET_TRIPLE}/release/rust_boot /workspace/target/rust_boot
 

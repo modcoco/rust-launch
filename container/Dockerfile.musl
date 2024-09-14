@@ -50,7 +50,6 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
         . "$HOME/.cargo/env"; \
         rustup target add aarch64-unknown-linux-musl; \
     fi && \
-    cargo update &&\
     cargo build --release --target ${TARGET_TRIPLE} && \
     cp /workspace/target/${TARGET_TRIPLE}/release/rust_boot /workspace/target/rust_boot
 
