@@ -8,11 +8,22 @@ use tracing_appender::{
     rolling::{RollingFileAppender, Rotation},
 };
 use tracing_subscriber::{
+    fmt,
     fmt::{format::Writer, time::FormatTime},
-    layer::SubscriberExt as _,
+    layer::{Layered, SubscriberExt as _},
+    reload::Handle,
     util::SubscriberInitExt as _,
-    EnvFilter,
+    EnvFilter, Registry,
 };
+
+pub type FileLogReloadLayer = Layered<
+    fmt::Layer<
+        Layered<tracing_subscriber::reload::Layer<EnvFilter, Registry>, Registry>,
+        fmt::format::DefaultFields,
+        fmt::format::Format<fmt::format::Full, LocalTimer>,
+    >,
+    Layered<tracing_subscriber::reload::Layer<EnvFilter, Registry>, Registry>,
+>;
 
 pub type ReloadLogLevelHandle =
     tracing_subscriber::reload::Handle<tracing_subscriber::EnvFilter, tracing_subscriber::Registry>;
@@ -55,11 +66,21 @@ impl FormatTime for LocalTimer {
 pub fn init_logger(
     app_name: &str,
     log_to_file: bool,
-) -> (Option<WorkerGuard>, ReloadLogLevelHandle) {
-    let default_filter = tracing_subscriber::EnvFilter::new(
+) -> (
+    Option<WorkerGuard>,
+    ReloadLogLevelHandle,
+    Handle<EnvFilter, FileLogReloadLayer>,
+) {
+    let stdout_default_filter = tracing_subscriber::EnvFilter::new(
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
     );
-    let (filter, reload_handle) = tracing_subscriber::reload::Layer::new(default_filter);
+    let file_default_filter = tracing_subscriber::EnvFilter::new(
+        std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
+    );
+    let (stdout_filter, reload_handle) =
+        tracing_subscriber::reload::Layer::new(stdout_default_filter);
+    let (file_filter, file_reload_handle) =
+        tracing_subscriber::reload::Layer::new(file_default_filter);
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_line_number(true)
@@ -69,7 +90,7 @@ pub fn init_logger(
         .with_timer(LocalTimer);
 
     let registry = tracing_subscriber::registry()
-        .with(filter)
+        .with(stdout_filter)
         .with(stdout_layer);
 
     let guard = if log_to_file {
@@ -88,7 +109,7 @@ pub fn init_logger(
             .with_writer(non_blocking)
             .with_ansi(false)
             .with_timer(LocalTimer);
-        _ = registry.with(file_layer).try_init();
+        _ = registry.with(file_filter).with(file_layer).try_init();
         Some(guard)
     } else {
         _ = registry.try_init();
@@ -96,7 +117,7 @@ pub fn init_logger(
     };
 
     tracing::info!("Logger initialized");
-    (guard, reload_handle)
+    (guard, reload_handle, file_reload_handle)
 }
 
 pub enum LogLevel {
