@@ -1,12 +1,12 @@
 [package]
-name = "kube"
+name = "kube_runtime"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 logger.workspace = true
 utils.workspace = true
-kube-runtime.workspace = true
+kube.workspace = true
 k8s-openapi.workspace = true
 rustls.workspace = true
 anyhow.workspace = true

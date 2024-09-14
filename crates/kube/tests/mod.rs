@@ -4,8 +4,8 @@ mod tests {
 
     use axum::http::HeaderMap;
     use k8s_openapi::api::core::v1::{ConfigMap, Namespace, Pod};
-    use kube::ServiceAccountToken;
-    use kube_runtime::{api::ListParams, Api, Client as KubeClient, Config};
+    use kube::{api::ListParams, Api, Client as KubeClient, Config};
+    use kube_runtime::ServiceAccountToken;
     use reqwest::{blocking::Client, header::AUTHORIZATION, Certificate};
     use utils::url_https_builder;
 

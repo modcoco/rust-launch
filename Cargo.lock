@@ -499,7 +499,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "config",
- "kube 0.1.0",
+ "kube_runtime",
  "regex",
  "sqlx",
  "tracing",
@@ -1420,26 +1420,6 @@ dependencies = [
 
 [[package]]
 name = "kube"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "axum",
- "dotenv",
- "k8s-openapi",
- "kube 0.93.1",
- "logger",
- "native-tls",
- "reqwest",
- "rustls",
- "serde_json",
- "tokio",
- "toml",
- "tracing",
- "utils",
-]
-
-[[package]]
-name = "kube"
 version = "0.93.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0365920075af1a2d23619c1ca801c492f2400157de42627f041a061716e76416"
@@ -1545,6 +1525,26 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+]
+
+[[package]]
+name = "kube_runtime"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "dotenv",
+ "k8s-openapi",
+ "kube",
+ "logger",
+ "native-tls",
+ "reqwest",
+ "rustls",
+ "serde_json",
+ "tokio",
+ "toml",
+ "tracing",
+ "utils",
 ]
 
 [[package]]
@@ -2363,7 +2363,7 @@ dependencies = [
  "chrono",
  "config",
  "context",
- "kube 0.1.0",
+ "kube_runtime",
  "logger",
  "num-format",
  "router",

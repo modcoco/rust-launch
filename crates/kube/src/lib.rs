@@ -1,6 +1,6 @@
 pub use k8s_openapi;
-pub use kube_runtime;
-use kube_runtime::{Client as KubeClient, Config};
+pub use kube;
+use kube::{Client as KubeClient, Config};
 use native_tls::TlsConnector;
 use utils::constants::{APP_ENV_LOCAL, APP_ENV_PRODUCT, CACRT_PATH, NAMESPACE_PATH, TOKEN_PATH};
 
