@@ -40,7 +40,7 @@ pub async fn init_router(
                 "/api/v2",
                 Router::new()
                     .route("/file-log-level", get(file_log_level))
-                    .layer(Extension(log_handle.file_handle)),
+                    // .layer(Extension(log_handle.file_handle)),
             )
             .nest(
                 "/api/v2",
