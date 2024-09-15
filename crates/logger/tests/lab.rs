@@ -30,7 +30,7 @@ fn init_logger_trace() {
     let (stdout_filter, stdout_reload_handle) =
         tracing_subscriber::reload::Layer::new(stdout_default_filter);
     let (file_filter, file_reload_handle) =
-        tracing_subscriber::reload::Layer::new(file_default_filter); // 保存 file_reload_handle，用于后续更新
+        tracing_subscriber::reload::Layer::new(file_default_filter);
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_line_number(true)
@@ -49,26 +49,31 @@ fn init_logger_trace() {
         .with_ansi(false)
         .with_timer(logger::logger_trace::LocalTimer);
 
+    // 统一注册stdout和file的filter和layer，确保全局初始化只调用一次
     let registry = tracing_subscriber::registry()
         .with(stdout_filter)
-        .with(stdout_layer);
+        .with(stdout_layer)
+        .with(file_filter)
+        .with(file_layer);
 
-    let _ = registry.with(file_filter).with(file_layer).try_init();
+    registry.try_init().expect("Failed to initialize logger");
 
     tracing::info!("Logger initialized");
 
+    // 重新加载过滤器
     let new_file_filter = tracing_subscriber::EnvFilter::new("trace");
     file_reload_handle
         .reload(new_file_filter)
         .expect("Failed to reload file filter");
 
-    let new_stdout_filter = tracing_subscriber::EnvFilter::new("debug");
+    let new_stdout_filter = tracing_subscriber::EnvFilter::new("info");
     stdout_reload_handle
         .reload(new_stdout_filter)
-        .expect("Failed to reload file filter");
+        .expect("Failed to reload stdout filter");
 
-    // 在更新过滤器之后，再次进行日志输出
+    // 测试不同级别的日志输出
     tracing::info!("This log will still follow the previous file filter.");
     tracing::debug!("This log will now be written to the file as per the new filter.");
     tracing::trace!("trace");
+    tracing::warn!("warn");
 }
