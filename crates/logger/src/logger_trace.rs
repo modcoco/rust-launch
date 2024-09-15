@@ -32,7 +32,7 @@ pub type FileReloadLogLevelHandle = Handle<EnvFilter, FileLogReloadLayer>;
 
 pub struct LogLevelHandles {
     pub stdout_handle: StdoutReloadLogLevelHandle,
-    pub file_handle: FileReloadLogLevelHandle,
+    // pub file_handle: FileReloadLogLevelHandle,
 }
 
 pub fn setup_logger() -> Arc<tokio::time::Instant> {
@@ -74,13 +74,8 @@ pub fn init_logger(app_name: &str, log_to_file: bool) -> (Option<WorkerGuard>, L
     let stdout_default_filter = tracing_subscriber::EnvFilter::new(
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
     );
-    let file_default_filter = tracing_subscriber::EnvFilter::new(
-        std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
-    );
     let (stdout_filter, reload_handle) =
         tracing_subscriber::reload::Layer::new(stdout_default_filter);
-    let (file_filter, file_reload_handle) =
-        tracing_subscriber::reload::Layer::new(file_default_filter);
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_line_number(true)
@@ -109,7 +104,7 @@ pub fn init_logger(app_name: &str, log_to_file: bool) -> (Option<WorkerGuard>, L
             .with_writer(non_blocking)
             .with_ansi(false)
             .with_timer(LocalTimer);
-        _ = registry.with(file_filter).with(file_layer).try_init();
+        _ = registry.with(file_layer).try_init();
         Some(guard)
     } else {
         _ = registry.try_init();
@@ -121,7 +116,6 @@ pub fn init_logger(app_name: &str, log_to_file: bool) -> (Option<WorkerGuard>, L
         guard,
         LogLevelHandles {
             stdout_handle: reload_handle,
-            file_handle: file_reload_handle,
         },
     )
 }
