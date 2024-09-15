@@ -1,8 +1,5 @@
 use logger::logger_trace::init_logger;
-use tracing_appender::{
-    non_blocking::WorkerGuard,
-    rolling::{RollingFileAppender, Rotation},
-};
+use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 #[test]
 fn logs_file() {
@@ -24,15 +21,16 @@ fn main() {
 #[test]
 fn init_logger_trace() {
     let stdout_default_filter = tracing_subscriber::EnvFilter::new(
-        std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
+        std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug"
     );
     let file_default_filter = tracing_subscriber::EnvFilter::new(
-        std::env::var("RUST_LOG_FILE").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
+        std::env::var("RUST_LOG_FILE").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug"
     );
-    let (stdout_filter, _stdout_reload_handle) =
+
+    let (stdout_filter, stdout_reload_handle) =
         tracing_subscriber::reload::Layer::new(stdout_default_filter);
-    let (file_filter, _file_reload_handle) =
-        tracing_subscriber::reload::Layer::new(file_default_filter);
+    let (file_filter, file_reload_handle) =
+        tracing_subscriber::reload::Layer::new(file_default_filter); // 保存 file_reload_handle，用于后续更新
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_line_number(true)
@@ -51,12 +49,26 @@ fn init_logger_trace() {
         .with_ansi(false)
         .with_timer(logger::logger_trace::LocalTimer);
 
-    let _registry = tracing_subscriber::registry()
+    let registry = tracing_subscriber::registry()
         .with(stdout_filter)
-        .with(stdout_layer)
-        .with(file_filter)
-        .with(file_layer)
-        .try_init();
+        .with(stdout_layer);
+
+    let _ = registry.with(file_filter).with(file_layer).try_init();
 
     tracing::info!("Logger initialized");
+
+    let new_file_filter = tracing_subscriber::EnvFilter::new("trace");
+    file_reload_handle
+        .reload(new_file_filter)
+        .expect("Failed to reload file filter");
+
+    let new_stdout_filter = tracing_subscriber::EnvFilter::new("debug");
+    stdout_reload_handle
+        .reload(new_stdout_filter)
+        .expect("Failed to reload file filter");
+
+    // 在更新过滤器之后，再次进行日志输出
+    tracing::info!("This log will still follow the previous file filter.");
+    tracing::debug!("This log will now be written to the file as per the new filter.");
+    tracing::trace!("trace");
 }
