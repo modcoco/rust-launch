@@ -27,6 +27,15 @@ pub async fn file_log_level(
     Ok(Json(current_file_log_level))
 }
 
+pub async fn tarcing_test_log() -> Result<impl IntoResponse, AxumErr> {
+    tracing::trace!("trace");
+    tracing::debug!("debug");
+    tracing::info!("info");
+    tracing::warn!("warn");
+    tracing::error!("error");
+    Ok(Json("ok"))
+}
+
 pub async fn info_checker(
     Extension(ctx): Extension<AppContext>,
 ) -> Result<impl IntoResponse, AxumErr> {
