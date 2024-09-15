@@ -22,12 +22,17 @@ fn main() {
 }
 
 #[test]
-fn init_logger_t() {
+fn init_logger_trace() {
     let stdout_default_filter = tracing_subscriber::EnvFilter::new(
         std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
     );
+    let file_default_filter = tracing_subscriber::EnvFilter::new(
+        std::env::var("RUST_LOG_FILE").unwrap_or_else(|_| "info".into()), // "info, my_crate=debug
+    );
     let (stdout_filter, _stdout_reload_handle) =
         tracing_subscriber::reload::Layer::new(stdout_default_filter);
+    let (file_filter, _file_reload_handle) =
+        tracing_subscriber::reload::Layer::new(file_default_filter);
 
     let stdout_layer = tracing_subscriber::fmt::layer()
         .with_line_number(true)
@@ -37,21 +42,21 @@ fn init_logger_t() {
         .with_timer(logger::logger_trace::LocalTimer);
 
     let file_appender = RollingFileAppender::new(Rotation::DAILY, "tests", "test_log");
-    let (non_blocking, guard) = tracing_appender::non_blocking(file_appender);
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
     let file_layer = tracing_subscriber::fmt::layer()
-            .with_line_number(true)
-            // .with_thread_ids(true)
-            // .with_thread_names(true)
-            .with_level(true)
-            .with_target(true)
-            .with_writer(non_blocking)
-            .with_ansi(false)
-            .with_timer(logger::logger_trace::LocalTimer);
+        .with_line_number(true)
+        .with_level(true)
+        .with_target(true)
+        .with_writer(non_blocking)
+        .with_ansi(false)
+        .with_timer(logger::logger_trace::LocalTimer);
 
-    let registry = tracing_subscriber::registry()
+    let _registry = tracing_subscriber::registry()
         .with(stdout_filter)
-        .with(stdout_layer);
-    _ = registry.with(file_layer).try_init();
+        .with(stdout_layer)
+        .with(file_filter)
+        .with(file_layer)
+        .try_init();
 
     tracing::info!("Logger initialized");
 }
