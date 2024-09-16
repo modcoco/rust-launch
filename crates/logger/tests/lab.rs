@@ -35,7 +35,7 @@ fn init_logger_trace() {
         .with_ansi(true)
         .with_timer(logger::logger_trace::LocalTimer);
 
-    let file_appender = RollingFileAppender::new(Rotation::DAILY, "tests", "test_log");
+    let file_appender = RollingFileAppender::new(Rotation::DAILY, "tests", "test.log");
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
     let file_layer = tracing_subscriber::fmt::layer()
         .with_line_number(true)
@@ -81,7 +81,7 @@ fn test_log_init() {
 
 #[test]
 fn test_file_log_init() {
-    let file = std::fs::File::create("test_log.txt").expect("Unable to create log file");
+    let file = std::fs::File::create("test.log").expect("Unable to create log file");
     let file_writer = std::sync::Arc::new(file);
     tracing_subscriber::fmt()
         .with_max_level(Level::INFO)
