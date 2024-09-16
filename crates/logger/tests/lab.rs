@@ -78,3 +78,23 @@ fn test_log_init() {
     warn!("test");
     error!("test");
 }
+
+#[test]
+fn test_file_log_init() {
+    let file = std::fs::File::create("test_log.txt").expect("Unable to create log file");
+    let file_writer = std::sync::Arc::new(file);
+    tracing_subscriber::fmt()
+        .with_max_level(Level::INFO)
+        .with_writer(tracing_subscriber::fmt::writer::MakeWriterExt::and(
+            std::io::stdout,
+            file_writer,
+        ))
+        .init();
+
+    println!("start");
+    trace!("test");
+    debug!("test");
+    info!("test");
+    warn!("test");
+    error!("test");
+}
