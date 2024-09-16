@@ -1,4 +1,5 @@
 use logger::logger_trace::init_logger;
+use tracing::*;
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 #[test]
@@ -63,4 +64,17 @@ fn init_logger_trace() {
     tracing::debug!("This log will now be written to the file as per the new filter.");
     tracing::trace!("trace");
     tracing::warn!("warn");
+}
+
+#[test]
+fn test_log_init() {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
+    println!("start");
+    trace!("test");
+    debug!("test");
+    info!("test");
+    warn!("test");
+    error!("test");
 }
