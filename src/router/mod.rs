@@ -8,9 +8,7 @@ use logger::logger_trace::LogLevelHandles;
 use router::init_crate_router;
 use tokio::net::TcpListener;
 
-use crate::handler::http::system::{
-    file_log_level, info_checker, stdout_log_level, tarcing_test_log,
-};
+use crate::handler::http::system::{info_checker, stdout_log_level, tarcing_test_log};
 
 pub async fn init_router(
     ctx: AppContext,
@@ -35,12 +33,6 @@ pub async fn init_router(
                 Router::new()
                     .route("/stdout-log-level", get(stdout_log_level))
                     .layer(Extension(log_handle.stdout_handle)),
-            )
-            .nest(
-                "/api/v2",
-                Router::new()
-                    .route("/file-log-level", get(file_log_level))
-                    // .layer(Extension(log_handle.file_handle)),
             )
             .nest(
                 "/api/v2",
