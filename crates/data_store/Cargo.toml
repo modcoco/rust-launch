@@ -5,3 +5,16 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+sqlx.workspace = true
+chrono.workspace = true
+tokio.workspace = true
+dotenvy.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
+serde.workspace = true
+
+syn.workspace = true
+quote.workspace = true
+
+[lib]
+proc-macro = true
