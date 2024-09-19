@@ -1,7 +1,10 @@
 use chrono::NaiveDateTime;
 use data_store::GetFieldNames;
+use proc_macro2::TokenStream;
+use quote::quote;
 use serde::{Deserialize, Serialize};
 use sqlx::{PgPool, QueryBuilder};
+use syn::Ident;
 
 const BIND_LIMIT: usize = 65535;
 
@@ -12,6 +15,31 @@ macro_rules! generate_push_binds {
             $query_builder.push_bind($user.$field);
         )*
     };
+}
+
+fn generate_push_binds_code(field_names: Vec<&str>) -> TokenStream {
+    let fields: Vec<Ident> = field_names
+        .into_iter()
+        .map(|name| Ident::new(name, proc_macro2::Span::call_site()))
+        .collect();
+
+    // 使用 quote! 生成代码
+    let bindings = fields.into_iter().map(|field| {
+        quote! {
+            b.push_bind($user.#field);
+        }
+    });
+
+    let bindings_stream: TokenStream = bindings.collect();
+
+    // 使用 quote! 宏构建最终的代码
+    let generated_code = quote! {
+        $(
+            #bindings_stream
+        )*
+    };
+
+    generated_code
 }
 
 #[tokio::test]
@@ -60,10 +88,9 @@ async fn insert_users_build(
         .filter(|&&field| field != "id")
         .copied()
         .collect();
-    let insert_value_unit = field_names.join(", ");
 
     let mut query_builder =
-        QueryBuilder::new(format!("INSERT INTO users ({}) ", insert_value_unit));
+        QueryBuilder::new(format!("INSERT INTO users ({}) ", field_names.join(", ")));
 
     query_builder.push_values(users.take(BIND_LIMIT / 4), |mut b, user| {
         generate_push_binds!(b, user, [username, email, created_at]);
@@ -100,4 +127,11 @@ async fn test_add_users() -> anyhow::Result<()> {
 
     insert_users_build(&pool, users).await?;
     Ok(())
+}
+
+#[test]
+fn test_generate_push_binds_code() {
+    let field_names = vec!["username", "email", "created_at"];
+    let generated_code = generate_push_binds_code(field_names);
+    println!("{}", generated_code);
 }
