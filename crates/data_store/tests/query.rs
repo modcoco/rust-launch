@@ -3,7 +3,7 @@ use data_store::GetFieldNames;
 use proc_macro2::TokenStream;
 use quote::quote;
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, QueryBuilder};
+use sqlx::{query, query_as, FromRow, PgPool, Postgres, QueryBuilder};
 use syn::Ident;
 
 const BIND_LIMIT: usize = 65535;
@@ -55,7 +55,48 @@ async fn test_query() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[derive(Debug, Default, Serialize, Deserialize, GetFieldNames)]
+// execute() 用于执行插入、更新、删除等不返回数据的 SQL 语句
+// fetch_one(): 获取一条记录
+// fetch_optional(): 获取零或一条记录
+// fetch_all(): 获取多条记录
+// fetch() 用于执行查询并返回 Stream，可以逐条获取记录
+
+#[tokio::test]
+async fn test_query_02() -> anyhow::Result<()> {
+    let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
+
+    let test = query(
+        r#"
+SELECT id, username, email, created_at FROM users
+"#,
+    )
+    // .bind(s)
+    .execute(&pool)
+    .await?;
+
+    println!("{:?}", test);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_query_03() -> anyhow::Result<()> {
+    let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
+
+    let test: Vec<User> = query_as(
+        r#"
+SELECT id, username, email, created_at FROM users
+"#,
+    )
+    .fetch_all(&pool)
+    .await?;
+
+    println!("{:?}", test);
+
+    Ok(())
+}
+
+#[derive(Debug, Default, Serialize, Deserialize, FromRow, GetFieldNames)]
 pub struct User {
     pub id: i32,
     pub username: String,
@@ -134,4 +175,125 @@ fn test_generate_push_binds_code() {
     let field_names = vec!["username", "email", "created_at"];
     let generated_code = generate_push_binds_code(field_names);
     println!("{}", generated_code);
+}
+
+#[tokio::test]
+async fn test_delete_01() -> anyhow::Result<()> {
+    let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
+
+    let user_id = 1;
+    let _ = query!(r#"DELETE FROM users WHERE id = $1"#, user_id)
+        .execute(&pool)
+        .await?;
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_delete_02() -> anyhow::Result<()> {
+    let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
+
+    let user_id = 2;
+    query("delete from users where id = $1")
+        .bind(user_id)
+        .execute(&pool)
+        .await?;
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_update_01() -> anyhow::Result<()> {
+    let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
+
+    let id = 4;
+    let rows_affected = sqlx::query!(
+        r#"
+UPDATE users
+SET email = 'test@gmail.com'
+WHERE id = $1
+        "#,
+        id
+    )
+    .execute(&pool)
+    .await?
+    .rows_affected();
+    println!("{}", rows_affected);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_update_02() -> anyhow::Result<()> {
+    let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
+
+    let id = 4;
+    let _ = query(
+        r#"
+UPDATE users
+SET email = 'test@gmail.com'
+WHERE id = $1
+        "#,
+    )
+    .bind(id)
+    .execute(&pool)
+    .await?;
+
+    Ok(())
+}
+
+#[test]
+fn test_push_bind() {
+    let mut qb: QueryBuilder<'_, Postgres> = QueryBuilder::new("SELECT * FROM users WHERE id = ");
+
+    qb.push_bind(42i32)
+        .push(" OR membership_level = ")
+        .push_bind(3i32);
+
+    println!("{}", qb.sql());
+    assert_eq!(
+        qb.sql(),
+        "SELECT * FROM users WHERE id = $1 OR membership_level = $2"
+    );
+}
+
+async fn insert_and_verify(
+    transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    id: i32,
+) -> Result<(), Box<dyn std::error::Error>> {
+    query!(
+        r#"INSERT INTO users (username, email)
+        VALUES ( $1, $2 )
+        "#,
+        "test",
+        "test todo"
+    )
+    .execute(&mut **transaction)
+    .await?;
+
+    let _ = query!(r#"SELECT FROM users WHERE id = $1"#, id)
+        .fetch_one(&mut **transaction)
+        .await?;
+
+    Ok(())
+}
+
+async fn explicit_rollback_example(
+    pool: &sqlx::PgPool,
+    test_id: i32,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut transaction = pool.begin().await?;
+
+    insert_and_verify(&mut transaction, test_id).await?;
+
+    transaction.rollback().await?;
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_transaction() -> anyhow::Result<()> {
+    let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
+    let _ = explicit_rollback_example(&pool, 1).await;
+    Ok(())
 }

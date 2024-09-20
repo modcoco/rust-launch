@@ -89,3 +89,8 @@ cargo deny init
 cargo deny check
 
 ```
+
+## Prepare sqlx
+```bash
+cargo sqlx prepare -- --lib
+```
