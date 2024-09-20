@@ -35,10 +35,18 @@ pub fn get_field_names(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
+// #[macro_export]
+// macro_rules! generate_push_binds {
+//     ($query_builder:expr, $domain:expr, [$($field:ident),*]) => {
+//         $(
+//             $query_builder.push_bind($domain.$field);
+//         )*
+//     };
+// }
+
 #[proc_macro]
 pub fn generate_push_binds(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ExprArray);
-
     let query_builder = &input.elems[0]; // query_builder
     let domain = &input.elems[1]; // domain
 
@@ -63,12 +71,3 @@ pub fn generate_push_binds(input: TokenStream) -> TokenStream {
 
     TokenStream::from(generated)
 }
-
-// #[macro_export]
-// macro_rules! generate_push_binds {
-//     ($query_builder:expr, $domain:expr, [$($field:ident),*]) => {
-//         $(
-//             $query_builder.push_bind($domain.$field);
-//         )*
-//     };
-// }
