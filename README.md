@@ -4,6 +4,9 @@
 # Run
 cargo run
 
+# Add new lib
+cargo new [crate_name] --lib
+
 # Show current cargo info
 rustup update
 rustup show
