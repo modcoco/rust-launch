@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use data_store::GetFieldNames;
+use data_store::{generate_push_binds, GetFieldNames};
 use proc_macro2::TokenStream;
 use quote::quote;
 use serde::{Deserialize, Serialize};
@@ -7,15 +7,6 @@ use sqlx::{query, query_as, FromRow, PgPool, Postgres, QueryBuilder};
 use syn::Ident;
 
 const BIND_LIMIT: usize = 65535;
-
-#[macro_export]
-macro_rules! generate_push_binds {
-    ($query_builder:expr, $user:expr, [$($field:ident),*]) => {
-        $(
-            $query_builder.push_bind($user.$field);
-        )*
-    };
-}
 
 fn generate_push_binds_code(field_names: Vec<&str>) -> TokenStream {
     let fields: Vec<Ident> = field_names
@@ -134,7 +125,8 @@ async fn insert_users_build(
         QueryBuilder::new(format!("INSERT INTO users ({}) ", field_names.join(", ")));
 
     query_builder.push_values(users.take(BIND_LIMIT / 4), |mut b, user| {
-        generate_push_binds!(b, user, [username, email, created_at]);
+        // generate_push_binds!(b, user, [username, email, created_at]);
+        generate_push_binds!([b, user, username, email, created_at]);
     });
 
     let query = query_builder.build();

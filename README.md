@@ -93,4 +93,5 @@ cargo deny check
 ## Prepare sqlx
 ```bash
 cargo sqlx prepare -- --lib
+cargo sqlx prepare -- --all-targets
 ```
