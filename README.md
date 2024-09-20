@@ -93,8 +93,24 @@ cargo deny check
 
 ```
 
-## Prepare sqlx
+## Prepare sqlx tables
+
 ```bash
 cargo sqlx prepare -- --lib
 cargo sqlx prepare -- --all-targets
+```
+
+## Sqlx migrate
+
+```bash
+# Install migrate
+cargo install sqlx-cli --no-default-features --features native-tls,postgres
+
+# Oprator
+sqlx db create
+sqlx migrate add create_users_table
+sqlx migrate run
+sqlx migrate revert
+sqlx migrate info
+
 ```
