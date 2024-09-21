@@ -114,3 +114,8 @@ sqlx migrate revert
 sqlx migrate info
 
 ```
+
+# Test add k8s kube
+```bash
+cp -r ~/.kube .
+```
