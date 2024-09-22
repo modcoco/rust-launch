@@ -46,7 +46,7 @@ router = { path = "crates/router" }
 
 tokio = { version = "1.33.0", features = ["full"] }
 tokio-tungstenite = { version = "0.23.1", features = ["native-tls"] }
-axum = { version = "0.7.5", features = ["macros", "ws"] }
+axum = { version = "0.7.6", features = ["macros", "ws"] }
 reqwest = { version = "0.12.2", features = [
     "json",
     "multipart",
