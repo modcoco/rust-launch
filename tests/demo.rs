@@ -8,7 +8,11 @@ fn to_gb(value: i64) -> i64 {
 
 #[cfg(test)]
 mod tests {
+    use std::hash::{DefaultHasher, Hash, Hasher};
+
     use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
+    use hex::encode;
+    use sha2::{Digest, Sha256};
 
     use super::*;
 
@@ -82,5 +86,46 @@ mod tests {
         let now = chrono::Local::now().naive_local() - chrono::Duration::hours(8);
 
         println!("{}", now);
+    }
+
+    fn generate_unique_key_only_numb(ip: &str, hostname: &str, mac: &str) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        ip.hash(&mut hasher);
+        hostname.hash(&mut hasher);
+        mac.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    fn generate_unique_key_sha256(ip: &str, hostname: &str, mac: &str) -> String {
+        let mut hasher = Sha256::new();
+
+        hasher.update(ip);
+        hasher.update(hostname);
+        hasher.update(mac);
+
+        let result = hasher.finalize();
+        let hex_string = hex::encode(result);
+
+        hex_string[..18].to_string()
+    }
+
+    #[test]
+    fn test_generate_unique_key_only_numb() {
+        let ip = "192.168.1.1";
+        let hostname = "host1";
+        let mac = "00:00:00:00:00:01";
+
+        let unique_key = generate_unique_key_only_numb(ip, hostname, mac);
+        println!("Unique Key: {}", unique_key);
+    }
+
+    #[test]
+    fn test_generate_unique_key_sha256() {
+        let ip = "192.168.1.1";
+        let hostname = "host1";
+        let mac = "00:00:00:00:00:01";
+
+        let unique_key = generate_unique_key_sha256(ip, hostname, mac);
+        println!("Unique Key: {}", unique_key);
     }
 }
