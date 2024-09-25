@@ -11,7 +11,6 @@ mod tests {
     use std::hash::{DefaultHasher, Hash, Hasher};
 
     use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
-    use hex::encode;
     use sha2::{Digest, Sha256};
 
     use super::*;
