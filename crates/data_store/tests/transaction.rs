@@ -13,19 +13,22 @@ pub struct User {
 
 async fn insert_and_verify(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    id: i32,
+    test_id: i64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     query!(
-        r#"INSERT INTO users (username, email)
+        r#"INSERT INTO todos (id, description)
         VALUES ( $1, $2 )
         "#,
-        "test",
+        test_id,
         "test todo"
     )
+    // In 0.7, `Transaction` can no longer implement `Executor` directly,
+    // so it must be dereferenced to the internal connection type.
     .execute(&mut **transaction)
     .await?;
 
-    let _ = query!(r#"SELECT FROM users WHERE id = $1"#, id)
+    // check that inserted todo can be fetched inside the uncommitted transaction
+    let _ = query!(r#"SELECT FROM todos WHERE id = $1"#, test_id)
         .fetch_one(&mut **transaction)
         .await?;
 
@@ -34,7 +37,7 @@ async fn insert_and_verify(
 
 async fn explicit_rollback_example(
     pool: &sqlx::PgPool,
-    test_id: i32,
+    test_id: i64,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut transaction = pool.begin().await?;
 
@@ -45,9 +48,23 @@ async fn explicit_rollback_example(
     Ok(())
 }
 
+async fn commit_example(
+    pool: &sqlx::PgPool,
+    test_id: i64,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut transaction = pool.begin().await?;
+
+    insert_and_verify(&mut transaction, test_id).await?;
+
+    transaction.commit().await?;
+
+    Ok(())
+}
+
 #[tokio::test]
 async fn test_transaction() -> anyhow::Result<()> {
     let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
-    let _ = explicit_rollback_example(&pool, 1).await;
+    // let _ = explicit_rollback_example(&pool, 1).await;
+    let _ = commit_example(&pool, 1).await;
     Ok(())
 }
