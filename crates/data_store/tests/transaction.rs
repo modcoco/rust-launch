@@ -53,7 +53,11 @@ async fn commit_example(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut transaction = pool.begin().await?;
 
-    insert_and_verify(&mut transaction, test_id).await?;
+    if let Err(e) = insert_and_verify(&mut transaction, test_id).await {
+        println!("Error occurred: {:?}", e);
+        transaction.rollback().await?;
+        return Err(e);
+    }
 
     transaction.commit().await?;
 
