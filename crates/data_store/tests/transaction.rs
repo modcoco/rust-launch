@@ -15,13 +15,12 @@ async fn insert_and_verify(
     transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     test_id: i64,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    query!(
+    query(
         r#"INSERT INTO todos (id, description)
         VALUES ( $1, $2 )
-        "#,
-        test_id,
-        "test todo"
-    )
+        "#
+    ).bind(test_id)
+    .bind("test todo")
     // In 0.7, `Transaction` can no longer implement `Executor` directly,
     // so it must be dereferenced to the internal connection type.
     .execute(&mut **transaction)
