@@ -34,7 +34,7 @@ async fn insert_and_verify(
     Ok(())
 }
 
-async fn explicit_rollback_example(
+async fn _explicit_rollback_example(
     pool: &sqlx::PgPool,
     test_id: i64,
 ) -> Result<(), Box<dyn std::error::Error>> {
