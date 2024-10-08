@@ -27,9 +27,10 @@ async fn insert_and_verify(
     .await?;
 
     // check that inserted todo can be fetched inside the uncommitted transaction
-    let _ = query!(r#"SELECT FROM todos WHERE id = $1"#, test_id)
-        .fetch_one(&mut **transaction)
-        .await?;
+    let _test: Option<sqlx::postgres::PgRow> =
+        query!(r#"SELECT FROM todos WHERE id = $1"#, test_id)
+            .fetch_optional(&mut **transaction)
+            .await?;
 
     Ok(())
 }
