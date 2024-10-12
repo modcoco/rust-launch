@@ -1,7 +1,7 @@
 use chrono::NaiveDateTime;
 use data_store::GetFieldNames;
 use serde::{Deserialize, Serialize};
-use sqlx::{query, FromRow, PgPool, Postgres, QueryBuilder};
+use sqlx::{query, FromRow, PgPool};
 
 #[derive(Debug, Default, Serialize, Deserialize, FromRow, GetFieldNames)]
 pub struct User {
