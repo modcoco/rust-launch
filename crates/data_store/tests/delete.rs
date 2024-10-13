@@ -37,7 +37,7 @@ async fn test_delete_02() -> anyhow::Result<()> {
 }
 
 #[tokio::test]
-async fn test_delete_03() -> anyhow::Result<()> {
+async fn test_delete_batch() -> anyhow::Result<()> {
     use sqlx::{PgPool, Postgres, QueryBuilder};
     let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
     let user_id_list = vec![2, 3];
