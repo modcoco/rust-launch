@@ -13,7 +13,7 @@ use sqlx::{query, query_as, FromRow, PgPool};
 async fn test_query() -> anyhow::Result<()> {
     let pool = PgPool::connect(&dotenvy::var("DATABASE_URL")?).await?;
 
-    let user = sqlx::query_as!(User, "SELECT id, username, email, created_at FROM users",)
+    let user: Vec<User> = sqlx::query_as("SELECT id, username, email, created_at FROM users")
         .fetch_all(&pool)
         .await?;
 
