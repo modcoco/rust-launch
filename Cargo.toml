@@ -83,7 +83,7 @@ delay_timer = "0.11.5"
 dotenv = "0.15.0"
 base64 = "0.22.1"
 toml = "0.8.14"
-rustls-pemfile = "2.1.2"
+rustls-pemfile = "2.2.0"
 native-tls = "0.2.12"
 futures-util = { version = "0.3.31", default-features = false, features = [
     "async-await",
