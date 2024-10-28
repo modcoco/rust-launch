@@ -70,8 +70,8 @@ dotenvy = "0.15.7"
 syn = "2.0.79"
 quote = "1.0.37"
 
-anyhow = { version = "1.0.90", features = ["std"] }
-thiserror = "1.0.64"
+anyhow = { version = "1.0.91", features = ["std"] }
+thiserror = "1.0.65"
 sqlx = { version = "0.8.2", features = [
     "runtime-tokio-rustls",
     "postgres",
