@@ -127,4 +127,16 @@ mod tests {
         let unique_key = generate_unique_key_sha256(ip, hostname, mac);
         println!("Unique Key: {}", unique_key);
     }
+
+    #[test]
+    fn test_ref_string() {
+        let ip: Option<String> = Some("192.168.1.1".to_string());
+        // 主要用于模式匹配中借用值的引用，而不是获取值的所有权,能够避免值的移动
+        if let Some(ref flag) = ip {
+            // if let Some(true) = is_multi_arch { 如果判断bool类型更简单
+            if flag == "true" {
+                // request_json["test"] = serde_json::json!("test");
+            }
+        }
+    }
 }
