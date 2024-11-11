@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
@@ -8,8 +10,13 @@ fn to_gb(value: i64) -> i64 {
 
 #[cfg(test)]
 mod tests {
-    use std::hash::{DefaultHasher, Hash, Hasher};
+    use std::{
+        fs::File,
+        hash::{DefaultHasher, Hash, Hasher},
+        io::Read,
+    };
 
+    use anyhow::Ok;
     use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
     use sha2::{Digest, Sha256};
 
@@ -137,6 +144,141 @@ mod tests {
             if flag == "true" {
                 // request_json["test"] = serde_json::json!("test");
             }
+        }
+    }
+
+    #[test]
+    fn test_idle() -> Result<(), anyhow::Error> {
+        let queue_name = "volcano-queue-idp-b-1795635752299212800";
+        struct MatchEntry {
+            node_id: usize,
+            is_match: bool,
+            match_score: f64,
+        }
+        let mut file = File::open("test.json").expect("无法打开文件");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)
+            .expect("无法读取文件内容");
+        let rsp: NodeAndQueueResource = serde_json::from_str(&contents)?;
+        assert!(!rsp.node_idle_resources.is_empty());
+
+        let team = rsp
+            .queue_idle_resources
+            .iter()
+            .find(|queue| queue.name == queue_name)
+            .ok_or_else(|| println!("test"))
+            .unwrap();
+
+        let mut nodes_match = rsp
+            .node_idle_resources
+            .iter()
+            .enumerate()
+            .map(|(node_id, node)| {
+                let match_score = node.gpu().num - team.gpu().num;
+                let is_match = node.cpu >= team.cpu
+                    && node.mem >= team.mem
+                    && node.gpu().num >= team.gpu().num;
+                MatchEntry {
+                    node_id,
+                    is_match,
+                    match_score,
+                }
+            })
+            .collect::<Vec<_>>();
+        if nodes_match.iter().any(|match_| match_.is_match) {
+            println!("1,{:?}", team.to_resource())
+        }
+        tracing::info!("not all nodes match queue {queue_name} idle resource");
+        nodes_match.sort_unstable_by(|a, b| a.match_score.total_cmp(&b.match_score));
+
+        println!(
+            "2,{:?}",
+            rsp.node_idle_resources[nodes_match.last().unwrap().node_id].to_resource()
+        );
+        Ok(())
+    }
+}
+
+#[derive(Deserialize, Debug)]
+struct NodeAndQueueResource {
+    node_idle_resources: Vec<IdleResource>,
+    queue_idle_resources: Vec<IdleResource>,
+}
+#[derive(Deserialize, Debug, Clone)]
+struct IdleResource {
+    #[serde(default)]
+    name: String,
+    cpu: f64,
+    mem: f64,
+    #[serde(default)]
+    gpu: Vec<GPU>,
+}
+
+impl IdleResource {
+    /// if both mthreads and vcuda, use mthreads first
+    fn gpu(&self) -> GPU {
+        self.gpu
+            .iter()
+            .max_by_key(|gpu| gpu.num as u32)
+            .map(|gpu| gpu.to_owned())
+            .unwrap_or_default()
+    }
+    fn to_resource(&self) -> Resource {
+        Resource {
+            memory: self.mem,
+            cpu: self.cpu,
+            gpu: self.gpu(),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct Resource {
+    /// memory GB
+    /// current setting memory limit is 1/3 of memory request
+    /// (spec.containers[].resources.requests.cpu)
+    pub memory: f64,
+    /// core count of cpu, 0.25 means 25% of one core same as 250mi in K8s resource limit
+    #[serde(rename = "numCpu")]
+    #[serde(alias = "cpu")]
+    pub cpu: f64,
+    /// if gpu<1: float, if gpu>=1: int
+    /// saas version   : memory gb
+    /// private version: device count of gpu cards
+    #[serde(flatten)]
+    pub gpu: GPU,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct GPU {
+    #[serde(rename = "gpuVendor")]
+    #[serde(alias = "vendor")]
+    #[serde(default = "gpu_vendor_default")]
+    pub vendor: String,
+    #[serde(rename = "gpuType")]
+    #[serde(alias = "type")]
+    #[serde(default = "gpu_type_default")]
+    pub r#type: String,
+    #[serde(rename = "numGpu")]
+    #[serde(alias = "gpu")]
+    // pub gpu: f64,
+    #[serde(alias = "num")]
+    pub num: f64,
+}
+
+pub fn gpu_vendor_default() -> String {
+    "nvidia.com".to_owned()
+}
+pub fn gpu_type_default() -> String {
+    "gpu".to_owned()
+}
+
+impl Default for GPU {
+    fn default() -> Self {
+        Self {
+            vendor: gpu_vendor_default(),
+            r#type: gpu_type_default(),
+            num: 0.0,
         }
     }
 }
