@@ -26,7 +26,7 @@ RUN if [ "${TARGETARCH}" = "amd64" ]; then \
     cargo build --release --target ${TARGET_TRIPLE} && \
     cp /workspace/target/${TARGET_TRIPLE}/release/rust_boot /workspace/target/rust_boot
 
-FROM debian:bookworm-20240904-slim
+FROM ubuntu:24.04
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
