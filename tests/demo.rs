@@ -18,6 +18,7 @@ mod tests {
 
     use anyhow::Ok;
     use chrono::{DateTime, FixedOffset, NaiveDateTime, Utc};
+    use clap::Parser;
     use sha2::{Digest, Sha256};
 
     use super::*;
@@ -145,6 +146,21 @@ mod tests {
                 // request_json["test"] = serde_json::json!("test");
             }
         }
+    }
+
+    #[test]
+    fn clap_test() {
+        #[derive(Parser, Debug)]
+        struct Args {
+            #[arg(short, long)]
+            name: String,
+            #[arg(short, long, default_value_t = 1)]
+            count: u8,
+        }
+
+        let args = Args::parse_from(["test", "--name", "Alice", "--count", "3"]);
+        assert_eq!(args.name, "Alice");
+        assert_eq!(args.count, 3);
     }
 
     #[test]
