@@ -16,6 +16,11 @@ async fn test_async() {
     println!("end");
 }
 
+// •	单向消息传递：使用 mpsc 或 oneshot。
+// •	多生产者多消费者：使用 broadcast。
+// •	共享数据：使用 Mutex 或 RwLock。
+// •	状态更新：使用 watch。
+// •	同步：使用 Barrier。
 #[tokio::test]
 async fn test_tokio_msg_with_hashmap() {
     // 创建两个异步通道：主线程 -> 辅助线程 和 辅助线程 -> 主线程
